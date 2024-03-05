@@ -24,13 +24,13 @@ A set of elo systems written in Python. Includes a balancer.
 - Topcoder
 
 ### Team Rating Systems
-- Bradley-Terry
+- Bradley-Terry (with partial)
 - Elo
 - Elo-MMR (simple and non-simple)
 - Trueskill
 - Glicko
 - Plackett-Luce
-- Thurstone Mosteller
+- Thurstone-Mosteller (with partial)
 
 ## Rating Systems Features
 - Contest Weights
