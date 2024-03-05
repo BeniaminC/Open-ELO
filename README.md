@@ -74,7 +74,7 @@ A set of elo systems written in Python. Includes a balancer.
 - trueskill
 
 ## Graphs of Balanced Games (20 players, 10 players per game)
-> 20 players were given a *true skill* level from a normal distribution. 10 players were randomly chosen. They were balanced and the most balanced game was chosen based on *rating*.  Outcome of game is based on the sum of their *performance* (*true skill* with a logistic noise). Therefore, the rating of the players should eventually converge to their true skill.
+> 20 players start with a rating of 1500 (mu) and a deviation of 500 (sigma). 20 players were also given a *true skill* level from a normal distribution from 0 (worst) to 3000 (best). 10 players were randomly chosen for each game. The players for each team (2 teams) are chosen from the balancer based on *rating*.  Outcome of game is based on the sum of their *performance* (*true skill* with a logistic noise).  Therefore, the rating of the players should eventually converge to their true skill.
 
 ### Bradley-Terry
 ![alt text](images/Bradley-Terry.png)
