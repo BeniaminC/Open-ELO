@@ -54,16 +54,16 @@ A set of elo systems written in Python. Includes a balancer.
 
 ## Balancer Features
 - Team Combinations
-- Set of Two Balance constraint
-    - (best two players must be on opposing teams, next two best players must be on opposing teams, etc...)
+- Constraints
+    - Set of Two Balance constraint (best two players must be on opposing teams, next two best players must be on opposing teams, etc...)
+    - Rating difference constraint (based on absolute value)
+    - Top K teams constraint
+    - Combined All constraints (intersection of all constraints)
 - Statistics
     - Sum
     - Average
     - Difference
     - Absolute Value
-- Top K teams constraint
-- Combined All constraints (intersection of all constraints)
-- Rating difference constraint (based on absolute value)
 - Best game
 
 ## Required Libraries
@@ -71,3 +71,4 @@ A set of elo systems written in Python. Includes a balancer.
 - Numpy
 - Scipy
 - nptyping
+- trueskill
