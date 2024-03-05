@@ -1,4 +1,4 @@
-# OpenELO
+# Open-ELO
 A set of elo systems written in Python. Includes a balancer.
 
 ## Elo Systems
