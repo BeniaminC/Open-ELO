@@ -72,3 +72,23 @@ A set of elo systems written in Python. Includes a balancer.
 - Scipy
 - nptyping
 - trueskill
+
+## Graphs of Balanced Games (20 players, 10 players per game)
+
+### Bradley-Terry
+![alt text](images/Bradley-Terry.png)
+
+### Elo-MMR
+![alt text](images/Elo-MMR.png)
+
+### Glicko
+![alt text](images/Glicko.png)
+
+### Plackett-Luce
+![alt text](images/Plackett-Luce.png)
+
+### Thurstone-Mosteller
+![alt text](images/Thurstone-Mosteller.png)
+
+### Trueskill
+![alt text](images/Trueskill.png)
