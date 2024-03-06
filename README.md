@@ -1,5 +1,32 @@
 # Open-ELO
-A set of elo systems written in Python. Includes a balancer.
+A set of elo systems written in Python. Includes a balancer.  Supports multithreading for both teams and individual players.
+
+## Usage
+
+Changes in data are stored in each individual player object.
+
+`round_update` for games with individual players and `team_round_update` for team games. The `standings` are slightly different for each. 
+
+### For Individual Players
+
+For individual players, create groupings of players that are tied. For example:
+```py
+#  Asumming you have references to player objects 'a', 'b', 'c', and 'd'
+standings = [[a, 0, 0], [b, 1, 2], [c, 1, 2], [d, 3, 3]]
+```
+Shows that player `a` is first, players `b` and `c` are tied for second, and player `d` is third.
+
+### For Teams
+
+For team games, the format is similar, but instead of grouping based on rank, you group based on teams, where the first integer is `team` and second integer is `rank`. The rank for each team is set by the first player of a particular team:
+```py
+#  Asumming you have references to player objects 'a', 'b', 'c', and 'd'
+standings = [[a, 0, 1], [b, 1, 2], [c, 0, 1], [d, 1, 2]]
+```
+Shows that `a` and `c` are on team `0` with rank `0`, and `b` and `d` are on team `1` with rank `2`.
+
+For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks match).
+
 
 ## Elo Systems
 - Bradley-Terry (https://jmlr.csail.mit.edu/papers/volume12/weng11a/weng11a.pdf)
