@@ -68,8 +68,6 @@ class TrueSkill(RatingSystem, TeamRatingSystem):
             mu = player_ts.mu
             sig = player_ts.sigma
             player.update_rating(Rating(mu, sig), 0.0)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(_update_player_rating, *zip(*zip(new_ratings, (player for player, _, _ in standings))))
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(_update_player_rating, *zip(*zip(new_ratings, (player for player, _, _ in standings))))
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(_update_player_rating, *zip(*zip(new_ratings, (player for player, _, _ in standings))))
