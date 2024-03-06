@@ -54,7 +54,7 @@ class Elo(RatingSystem, TeamRatingSystem):
         team_ratings = list(TeamRating(team, team_info['rank'], agg(team_info['players'])) for team, team_info in team_standings.items())
         N = len(team_ratings)
         prob_denom = comb(N, 2)
-        k = 40 * params.weight
+        k = 40 * params.weight  # TODO: create a variable k-factor based on teams (default 40)
 
         def _update_player_rating(relative_rank: int, team_i: TeamRating):
             team_i_mu = team_i.rating.mu
@@ -69,7 +69,7 @@ class Elo(RatingSystem, TeamRatingSystem):
             team_i_rating_sum = sum(player.approx_posterior.mu for player in team_standings[team_i.team]['players'])
             for player in team_standings[team_i.team]['players']:
                 old_mu = player.approx_posterior.mu
-                w = 1.
+                w = 1.  # TODO: adjust weight based on teammate (default 1.)
                 new_mu = old_mu + w * (team_new_mu - team_i_mu)
                 player.update_rating(Rating(new_mu, 0), 0)
         with concurrent.futures.ThreadPoolExecutor() as executor:
