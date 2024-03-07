@@ -234,8 +234,9 @@ class EloTeamBalancer:
 
     def get_best_game(self) -> tuple[Game, GameStats]:
         elo_info = self.create_elo_info()
-        best_game = elo_info['game_combinations'][elo_info['all_constraints_ind']][0]
-        best_stats = elo_info['game_statistics'][elo_info['all_constraints_ind']][0]
+        best_ind = np.argmin(elo_info['game_statistics'][elo_info['all_constraints_ind']][:, 5])
+        best_game = elo_info['game_combinations'][elo_info['all_constraints_ind']][best_ind]
+        best_stats = elo_info['game_statistics'][elo_info['all_constraints_ind']][best_ind]
         return best_game, best_stats
 
     def get_new_player_offset(self):
