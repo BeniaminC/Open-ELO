@@ -1,5 +1,5 @@
 # Open-ELO
-A set of elo systems written in Python. Includes a balancer.  Supports multithreading for both teams and individual players.
+A set of elo systems written in Python. Includes a balancer and team skill adjuster.  Supports multithreading for both teams and individual players.
 
 ## Usage
 
