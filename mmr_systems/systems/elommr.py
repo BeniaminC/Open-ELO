@@ -1,31 +1,30 @@
 import concurrent.futures
 from bisect import bisect_left, bisect_right
-from collections import namedtuple
 from dataclasses import dataclass, field
 from functools import reduce
 from itertools import chain, groupby
 from operator import itemgetter
 from typing import Self
 
+from mmr_systems.common.aggregation import TeamRatingAggregation
 from mmr_systems.common.bucket import bucket, cmp_by_bucket, same_bucket
-from mmr_systems.common.common import (ContestRatingParams, EloMMRVariant,
-                                       RatingSystem, TanhTerm,
-                                       TeamRatingAggregation, TeamRatingSystem,
-                                       eval_equal, eval_grea, eval_less)
-from mmr_systems.common.numericals import (BOUNDS, DEFAULT_DRIFTS_PER_DAY,
-                                           DEFAULT_SIG_LIMIT,
-                                           DEFAULT_SPLIT_TIES,
-                                           DEFAULT_TRANSFER_SPEED,
-                                           DEFAULT_WEIGHT_LIMIT, FLOAT_MAX,
-                                           INT_MAX, clamp, solve_newton)
+from mmr_systems.common.constants import (BOUNDS, DEFAULT_WEIGHT_LIMIT, DEFAULT_SIG_LIMIT, 
+                                          DEFAULT_DRIFTS_PER_DAY, DEFAULT_SPLIT_TIES, 
+                                          INT_MAX, DEFAULT_TRANSFER_SPEED, FLOAT_MAX)
+from mmr_systems.common.common import (ContestRatingParams, EloMMRVariant, TanhTerm,
+                                       eval_equal, eval_grea, eval_less, Standings)
+from mmr_systems.common.numericals import (clamp, solve_newton)
 from mmr_systems.common.player import Player
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
 from mmr_systems.common.term import Rating
-
-TeamRating = namedtuple('TeamRating', ['team', 'rank', 'rating'])
 
 
 @dataclass
 class SimpleEloMMR(RatingSystem, TeamRatingSystem):
+    '''
+    Simple Elo-MMR rating system.
+    '''
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
     noob_delay: list[float] = field(default_factory=list)
     sig_limit: float = DEFAULT_SIG_LIMIT
@@ -48,7 +47,16 @@ class SimpleEloMMR(RatingSystem, TeamRatingSystem):
             self.history_len,
         )
 
-    def round_update(self, params: ContestRatingParams, standings: list[tuple[Player, int, int]], contest_time: int = 0) -> None:
+    def round_update(self, params: ContestRatingParams, standings: Standings, contest_time: int = 0) -> None:
+        '''
+        Update the player ratings according to the standings.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         self.init_players_event(standings, contest_time)
 
         def _update_player(player: Player):
@@ -84,10 +92,18 @@ class SimpleEloMMR(RatingSystem, TeamRatingSystem):
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation,
                           contest_time: int = 0) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
 
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         self.init_players_event(standings, contest_time)
 
         def _update_player(player: Player, team: int):
@@ -146,6 +162,9 @@ class SimpleEloMMR(RatingSystem, TeamRatingSystem):
 
 @dataclass
 class EloMMR(RatingSystem, TeamRatingSystem):
+    '''
+    Elo-MMR rating system.
+    '''
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
     noob_delay: list[float] = field(default_factory=list)
     sig_limit: float = DEFAULT_SIG_LIMIT
@@ -203,7 +222,16 @@ class EloMMR(RatingSystem, TeamRatingSystem):
         end = min(len(terms), end + expand)
         return range(beg, end)
 
-    def round_update(self, params: ContestRatingParams, standings: list[tuple[Player, int, int]], contest_time: int = 0):
+    def round_update(self, params: ContestRatingParams, standings: Standings, contest_time: int = 0):
+        '''
+        Update the player ratings according to the standings.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         self.init_players_event(standings, contest_time)
 
         def _update_player(player: Player, lo: int):
@@ -279,7 +307,16 @@ class EloMMR(RatingSystem, TeamRatingSystem):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(_update_player_rating, *zip(*((player, lo) for player, lo, _ in standings)))
 
-    def team_round_update(self, params: ContestRatingParams, standings: list[tuple[Player, int, int]], agg: TeamRatingAggregation, contest_time: int = 0):
+    def team_round_update(self, params: ContestRatingParams, standings: Standings, agg: TeamRatingAggregation, contest_time: int = 0):
+        '''
+        Update the player ratings in teams according to their team and rank.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         self.init_players_event(standings, contest_time)
 
         def _update_player(player: Player, team: int):

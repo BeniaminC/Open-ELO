@@ -92,6 +92,7 @@ For simplicity, you can set the team integer to the rank integer (assuming the t
     - Difference
     - Absolute Value
 - Best game
+- Team skill adjuster (adjusts the skill of each player according to an activation function, i.e., scale higher skilled players higher).
 
 ## Required Libraries
 - Python 12.0+

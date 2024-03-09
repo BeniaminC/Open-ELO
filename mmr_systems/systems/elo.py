@@ -1,24 +1,32 @@
 import concurrent.futures
-from collections import namedtuple
 from dataclasses import dataclass, field
 from math import comb
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem,
-                                       TeamRatingAggregation, TeamRatingSystem)
-from mmr_systems.common.player import Player
+from typing import NamedTuple
+
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.common import ContestRatingParams, Standings
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
 from mmr_systems.common.term import Rating
 
-KFactor = namedtuple('KFactor', ['k', 'games', 'rating'])
-TeamRating = namedtuple('TeamRating', ['team', 'rank', 'rating'])
+
+class KFactor(NamedTuple):
+    k: float
+    games: int
+    rating: float
 
 
 @dataclass
 class Elo(RatingSystem, TeamRatingSystem):
+    '''
+    Classic Elo rating system.
+    '''
     beta: float = 400
     k_factors: list[KFactor] = field(default_factory=list)
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
         raise NotImplementedError()
 
     @staticmethod
@@ -33,7 +41,7 @@ class Elo(RatingSystem, TeamRatingSystem):
     def _r(N: int, rank_i: int):
         return (N - rank_i) / comb(N, 2)
 
-    def k_factor(self, games: int, rating: float, default: int = 40) -> int:
+    def k_factor(self, games: int, rating: float, default: int = 40) -> float:
         for k_factor in self.k_factors:
             if k_factor.games and k_factor.rating and k_factor.games > games and k_factor.rating > rating:
                 return k_factor.k
@@ -45,9 +53,17 @@ class Elo(RatingSystem, TeamRatingSystem):
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
 
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         s = self.beta / (params.weight ** 0.5)
         self.init_players_event(standings)
         team_standings = self.convert_to_teams(standings)

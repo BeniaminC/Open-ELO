@@ -1,22 +1,17 @@
 import concurrent.futures
-from collections import namedtuple
 from dataclasses import dataclass, field
 from operator import itemgetter
 
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem,
-                                       TeamRatingAggregation, TeamRatingSystem,
-                                       total_partial)
-from mmr_systems.common.numericals import (DEFAULT_BETA,
-                                           DEFAULT_DRIFTS_PER_DAY,
-                                           DEFAULT_SIG_LIMIT,
-                                           DEFAULT_WEIGHT_LIMIT,
-                                           DRAW_PROBABILITY,
-                                           standard_normal_cdf,
-                                           standard_normal_pdf)
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
+                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
+                                          DRAW_PROBABILITY)
+from mmr_systems.common.common import (ContestRatingParams, total_partial)
+from mmr_systems.common.numericals import (standard_normal_cdf, standard_normal_pdf)
 from mmr_systems.common.ordering import Ordering
 from mmr_systems.common.player import Player
-
-TeamRating = namedtuple('TeamRating', ['team', 'rank', 'rating'])
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
 
 
 def _V(x: float, t: float) -> float:
@@ -37,6 +32,9 @@ def _tilde_W(x: float, t: float) -> float:
 
 @dataclass
 class ThurstoneMosteller(RatingSystem, TeamRatingSystem):
+    '''
+    Thurstone-Mosteller rating system.
+    '''
     beta: float = DEFAULT_BETA
     kappa: float = 1e-4
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
@@ -70,6 +68,15 @@ class ThurstoneMosteller(RatingSystem, TeamRatingSystem):
                           standings: list[tuple[Player, int, int]],
                           agg: TeamRatingAggregation,
                           contest_time: int = 0) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`list[tuple[Player, int, int]]): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         self.init_players_event(standings, contest_time=contest_time)
 
         def _update_player(player: Player):
@@ -118,6 +125,9 @@ class ThurstoneMosteller(RatingSystem, TeamRatingSystem):
 
 @dataclass
 class ThurstoneMostellerPartial(RatingSystem, TeamRatingSystem):
+    '''
+    Thurstone-Mosteller partial rating system.
+    '''
     beta: float = DEFAULT_BETA
     kappa: float = 1e-4
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
@@ -150,6 +160,15 @@ class ThurstoneMostellerPartial(RatingSystem, TeamRatingSystem):
                           params: ContestRatingParams,
                           standings: list[tuple[Player, int, int]],
                           agg: TeamRatingAggregation) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`list[tuple[Player, int, int]]): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         self.init_players_event(standings)
 
         def _update_player(player: Player):

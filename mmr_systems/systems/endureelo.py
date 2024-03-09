@@ -1,9 +1,12 @@
 import concurrent.futures
 from dataclasses import dataclass
-from mmr_systems.common.common import ContestRatingParams, RatingSystem
-from mmr_systems.common.term import Rating
+
+from mmr_systems.common.common import (ContestRatingParams, Standings)
+from mmr_systems.common.constants import (DEFAULT_BETA)
+from mmr_systems.common.numericals import standard_logistic_cdf
 from mmr_systems.common.player import Player
-from mmr_systems.common.numericals import DEFAULT_BETA, standard_logistic_cdf
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.term import Rating
 
 
 @dataclass
@@ -18,7 +21,16 @@ class EndureElo(RatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
+        '''
+        Update the player ratings according to the standings.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         self.init_players_event(standings)
 
         def _update_player(player: Player):

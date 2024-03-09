@@ -6,14 +6,14 @@ from operator import itemgetter
 
 import trueskill as ts
 
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem,
-                                       TeamRatingAggregation, TeamRatingSystem)
-from mmr_systems.common.numericals import (DEFAULT_DRIFTS_PER_DAY,
-                                           DEFAULT_SIG_LIMIT,
-                                           DEFAULT_WEIGHT_LIMIT, TS_BACKEND,
-                                           TS_BETA, TS_DRAW_PROP, TS_MU,
-                                           TS_SIG, TS_TAU)
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.common import (ContestRatingParams, Standings)
+from mmr_systems.common.constants import (TS_MU, TS_SIG, TS_BETA, TS_TAU,
+                                          TS_DRAW_PROB, TS_BACKEND, DEFAULT_WEIGHT_LIMIT,
+                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
 from mmr_systems.common.player import Player
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRatingSystem
 from mmr_systems.common.term import Rating
 
 TeamRating = namedtuple('TeamRating', ['team', 'rank'])
@@ -21,11 +21,14 @@ TeamRating = namedtuple('TeamRating', ['team', 'rank'])
 
 @dataclass
 class TrueSkill(RatingSystem, TeamRatingSystem):
+    '''
+    Trueskill rating system (an extension of Trueskill.py)
+    '''
     ts_env: ts.TrueSkill = field(default_factory=lambda: ts.TrueSkill(TS_MU,
                                                                       TS_SIG,
                                                                       TS_BETA,
                                                                       TS_TAU,
-                                                                      TS_DRAW_PROP,
+                                                                      TS_DRAW_PROB,
                                                                       TS_BACKEND))
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
     noob_delay: list[float] = field(default_factory=list)
@@ -40,12 +43,12 @@ class TrueSkill(RatingSystem, TeamRatingSystem):
 
     def round_update(self,
                     params: ContestRatingParams,
-                    standings: list[tuple[Player, int, int]]) -> None:
+                    standings: Standings) -> None:
         raise NotImplementedError()
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation | None = None,
                           contest_time: int = 0) -> None:
         self.init_players_event(standings, contest_time=contest_time)

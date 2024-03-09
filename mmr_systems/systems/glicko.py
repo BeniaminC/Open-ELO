@@ -1,25 +1,26 @@
 import concurrent.futures
-from collections import namedtuple
 from dataclasses import dataclass, field
 from math import comb, pi
 
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem,
-                                       TeamRatingAggregation, TeamRatingSystem)
-from mmr_systems.common.numericals import (DEFAULT_BETA,
-                                           DEFAULT_DRIFTS_PER_DAY,
-                                           DEFAULT_SIG_LIMIT,
-                                           DEFAULT_WEIGHT_LIMIT, GLICKO_Q,
-                                           TANH_MULTIPLIER,
-                                           standard_logistic_cdf)
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
+                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
+                                          GLICKO_Q, TANH_MULTIPLIER)
+from mmr_systems.common.common import (ContestRatingParams, Standings)
+from mmr_systems.common.numericals import standard_logistic_cdf
 from mmr_systems.common.ordering import Ordering
 from mmr_systems.common.player import Player
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
 from mmr_systems.common.term import Rating
 
-TeamRating = namedtuple('TeamRating', ['team', 'rank', 'rating'])
 
 
 @dataclass
 class Glicko(RatingSystem, TeamRatingSystem):
+    '''
+    Glicko rating system.
+    '''
     beta: float = DEFAULT_BETA
     scaling: float = 400.
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
@@ -34,8 +35,16 @@ class Glicko(RatingSystem, TeamRatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
+        '''
+        Update the player ratings according to the standings.
 
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         sig_perf = self.beta / (params.weight ** 0.5)
         self.init_players_event(standings)
 
@@ -96,14 +105,21 @@ class Glicko(RatingSystem, TeamRatingSystem):
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation,
                           contest_time: int = 0) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
 
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         sig_perf = self.beta / ((self.weight_limit * params.weight) ** 0.5)
         gli_q = TANH_MULTIPLIER / sig_perf
         self.init_players_event(standings, contest_time=contest_time)
-
         def _update_player(player: Player):
             weight = self.compute_weight(params.weight, self.weight_limit, self.noob_delay, player.times_played_excl())
             sig_drift = self.compute_sig_drift(weight, self.sig_limit, self.drift_per_day, float(player.delta_time))

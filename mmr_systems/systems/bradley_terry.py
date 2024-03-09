@@ -1,26 +1,29 @@
+'''
+Bradley-Terry Rating System
+Source: https://jmlr.csail.mit.edu/papers/volume12/weng11a/weng11a.pdf
+'''
+
 import concurrent.futures
-from collections import namedtuple
 from dataclasses import dataclass, field
 from math import exp
 from operator import itemgetter
 
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem,
-                                       TeamRatingAggregation, TeamRatingSystem,
-                                       total_partial)
-from mmr_systems.common.numericals import (DEFAULT_BETA,
-                                           DEFAULT_DRIFTS_PER_DAY,
-                                           DEFAULT_SIG_LIMIT,
-                                           DEFAULT_WEIGHT_LIMIT,
-                                           standard_logistic_cdf)
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.constants import DEFAULT_BETA, DEFAULT_DRIFTS_PER_DAY, DEFAULT_SIG_LIMIT, DEFAULT_WEIGHT_LIMIT
+from mmr_systems.common.common import ContestRatingParams, Standings, total_partial
+from mmr_systems.common.numericals import (standard_logistic_cdf)
 from mmr_systems.common.ordering import Ordering
 from mmr_systems.common.player import Player
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
 from mmr_systems.common.term import Rating
-
-TeamRating = namedtuple('TeamRating', ['team', 'rank', 'rating'])
 
 
 @dataclass
 class BradleyTerry(RatingSystem, TeamRatingSystem):
+    '''
+    Bradley-Terry Rating System.
+    '''
     beta: float = DEFAULT_BETA
     kappa: float = 1e-4
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
@@ -29,8 +32,8 @@ class BradleyTerry(RatingSystem, TeamRatingSystem):
     drift_per_day: float = DEFAULT_DRIFTS_PER_DAY
 
     @staticmethod
-    def _win_probability(c: float, player: Rating, foe: Rating) -> float:
-        z = (player.mu - foe.mu) / c
+    def _win_probability(c: float, player_i: Rating, Player_q: Rating) -> float:
+        z = (player_i.mu - Player_q.mu) / c
         return standard_logistic_cdf(z)
 
     @staticmethod
@@ -41,7 +44,16 @@ class BradleyTerry(RatingSystem, TeamRatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
+        '''
+        Update the player ratings according to the standings.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         self.init_players_event(standings)
 
         def _update_player(player: Player, lo: int):
@@ -83,9 +95,18 @@ class BradleyTerry(RatingSystem, TeamRatingSystem):
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation,
                           contest_time: int = 0) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         self.init_players_event(standings, contest_time=contest_time)
 
         def _update_player(player: Player):
@@ -150,7 +171,7 @@ class BradleyTerryPartial(RatingSystem, TeamRatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
         self.init_players_event(standings)
 
         def _update_player(player: Player, lo: int):
@@ -195,7 +216,7 @@ class BradleyTerryPartial(RatingSystem, TeamRatingSystem):
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation,
                           contest_time: int = 0) -> None:
         self.init_players_event(standings, contest_time=contest_time)

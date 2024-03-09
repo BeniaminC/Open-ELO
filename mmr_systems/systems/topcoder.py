@@ -1,14 +1,19 @@
+import concurrent.futures
 from dataclasses import dataclass
 
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem)
+from mmr_systems.common.common import (ContestRatingParams, Standings)
+from mmr_systems.common.numericals import (clamp, standard_normal_cdf,
+                                           standard_normal_cdf_inv)
 from mmr_systems.common.player import Player
-from mmr_systems.common.numericals import clamp, standard_normal_cdf, standard_normal_cdf_inv
+from mmr_systems.common.rating_system import RatingSystem
 from mmr_systems.common.term import Rating
-import concurrent.futures
 
 
 @dataclass
 class Topcoder(RatingSystem):
+    '''
+    Topcoder rating system.
+    '''
     weight_noob: float = 0.6
     weight_limit: float = 0.18
 
@@ -19,7 +24,16 @@ class Topcoder(RatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
+        '''
+        Update the player ratings according to the standings.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         self.init_players_event(standings)
         num_coders = float(len(standings))
         avg_rating = sum(player.approx_posterior.mu for player, _, _ in standings) / num_coders

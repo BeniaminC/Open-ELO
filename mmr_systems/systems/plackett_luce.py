@@ -1,23 +1,25 @@
 import concurrent.futures
-from collections import Counter, namedtuple
+from collections import Counter
 from dataclasses import dataclass, field
 from math import exp
 
-from mmr_systems.common.common import (ContestRatingParams, RatingSystem,
-                                       TeamRatingAggregation, TeamRatingSystem,
-                                       ranks_ge)
-from mmr_systems.common.numericals import (DEFAULT_BETA,
-                                           DEFAULT_DRIFTS_PER_DAY,
-                                           DEFAULT_SIG_LIMIT,
-                                           DEFAULT_WEIGHT_LIMIT)
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
+                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
+from mmr_systems.common.common import (ContestRatingParams, ranks_ge, Standings)
 from mmr_systems.common.ordering import Ordering
 from mmr_systems.common.player import Player
+from mmr_systems.common.rating_system import RatingSystem
+from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
 
-TeamRating = namedtuple('TeamRating', ['team', 'rank', 'rating'])
+
 
 
 @dataclass
 class PlackettLuce(RatingSystem, TeamRatingSystem):
+    '''
+    Plackett-Luce rating system.
+    '''
     beta: float = DEFAULT_BETA
     kappa: float = 1e-4
 
@@ -28,14 +30,23 @@ class PlackettLuce(RatingSystem, TeamRatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
         raise NotImplementedError()
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation,
                           contest_time: int = 0) -> None:
+        '''
+        Update the player ratings in teams according to their team and rank.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to their `team` and `rank`. Must be in order.
+        '''
         self.init_players_event(standings, contest_time=contest_time)
 
         def _update_player(player: Player):
@@ -51,7 +62,6 @@ class PlackettLuce(RatingSystem, TeamRatingSystem):
         sig_perf_sq = self.beta ** 2 / (self.weight_limit * params.weight)
         c = float(sum(team_i.rating.sig + sig_perf_sq for team_i in team_ratings) ** 0.5)
         A_q = Counter(team.rank for team in team_ratings)
-
         def _update_player_rating(team_i: TeamRating):
             team_i_sig_sq = team_i.rating.sig
             gamma_q = (team_i_sig_sq ** 0.5) / c

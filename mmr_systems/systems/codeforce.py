@@ -1,14 +1,21 @@
 import concurrent.futures
 from dataclasses import dataclass
 
-from mmr_systems.common.common import ContestRatingParams, RatingSystem, TeamRatingAggregation
-from mmr_systems.common.numericals import DEFAULT_BETA, TANH_MULTIPLIER, standard_logistic_cdf
+
+from mmr_systems.common.aggregation import TeamRatingAggregation
+from mmr_systems.common.common import ContestRatingParams, Standings
+from mmr_systems.common.constants import DEFAULT_BETA, TANH_MULTIPLIER
+from mmr_systems.common.numericals import standard_logistic_cdf
 from mmr_systems.common.player import Player
+from mmr_systems.common.rating_system import RatingSystem
 from mmr_systems.common.term import Rating, TanhTerm, robust_average
 
 
 @dataclass
 class Codeforce(RatingSystem):
+    '''
+    Code Force rating system.
+    '''
     beta: float = DEFAULT_BETA
     weight: float = 1.
 
@@ -39,7 +46,16 @@ class Codeforce(RatingSystem):
 
     def round_update(self,
                      params: ContestRatingParams,
-                     standings: list[tuple[Player, int, int]]) -> None:
+                     standings: Standings) -> None:
+        '''
+        Update the player ratings according to the standings.
+
+        Args:
+            params (:obj:`ContestRatingParams`): Parameters of a particular contest.
+
+            standings (:obj:`Standings`): Standings of each player
+            according to `team` and `rank`, respectively. Must be in order.
+        '''
         self.init_players_event(standings)
         sig_perf = self.beta / params.weight ** 0.5
 
@@ -65,6 +81,6 @@ class Codeforce(RatingSystem):
 
     def team_round_update(self,
                           params: ContestRatingParams,
-                          standings: list[tuple[Player, int, int]],
+                          standings: Standings,
                           agg: TeamRatingAggregation) -> None:
         raise NotImplementedError()

@@ -1,38 +1,8 @@
 import math
-from sys import maxsize
 from typing import Callable
 from scipy.special import erfcinv
 
-INT_MAX = maxsize
-TANH_MULTIPLIER: float = math.pi / 1.7320508075688772
-FRAC_2_SQRT_PI = 1.12837916709551257389615890312154517
-SQRT_2 = 1.41421356237309504880168872420969808
-
-BOUNDS = (-6000., 9000.)
-LN_10: float = 2.30258509299404568401799145468436421
-DEFAULT_MU = 1500.
-DEFAULT_SIG = 500.
-DEFAULT_SIG_LIMIT = 40.
-FLOAT_MAX: float = float('inf')
-
-SECS_PER_DAY = 86400
-DEFAULT_WEIGHT_LIMIT = 0.2
-DEFAULT_DRIFTS_PER_DAY = 0.
-DEFAULT_SPLIT_TIES = False
-DEFAULT_TRANSFER_SPEED = 1.
-
-TS_MU = 1500.
-TS_SIG = 500.
-TS_BETA = 250.
-TS_TAU = 5.
-TS_DRAW_PROP = 0.001
-TS_BACKEND = 'scipy'
-
-DEFAULT_BETA = 400. * TANH_MULTIPLIER / LN_10
-
-DRAW_PROBABILITY = 0.0001
-
-GLICKO_Q = math.log(10) / 400.
+from mmr_systems.common.constants import FRAC_2_SQRT_PI, SQRT_2, TANH_MULTIPLIER
 
 
 def standard_logistic_pdf(z: float) -> float:
@@ -61,6 +31,9 @@ def standard_normal_cdf_inv(prob: float) -> float:
 
 
 def solve_bisection(bounds: tuple[float, float], f: Callable[..., float]) -> float:
+    '''
+    Given bounds and a scalar function (takes 1 variable), return the root.
+    '''
     lo, hi = bounds
     while True:
         flo = f(lo)
@@ -74,6 +47,9 @@ def solve_bisection(bounds: tuple[float, float], f: Callable[..., float]) -> flo
 
 
 def solve_illinois(bounds: tuple[float, float], f: Callable[..., float]) -> float:
+    '''
+    Given bounds and a scalar function (takes 1 variable), return the root.
+    '''
     lo, hi = bounds
     (flo, fhi, side) = (f(lo), f(hi), 0)
     while True:
@@ -98,10 +74,17 @@ def solve_illinois(bounds: tuple[float, float], f: Callable[..., float]) -> floa
 
 
 def clamp(n, smallest, largest):
+    '''
+    Given a value `n`, return the clamped value between smallest and largest.
+
+    '''
     return max(smallest, min(n, largest))
 
 
 def solve_newton(lo_hi, f):
+    '''
+    Given bounds and a scalar function (takes 1 variable), return the root.
+    '''
     lo, hi = lo_hi
     guess = 0.5 * (lo + hi)
     while True:
