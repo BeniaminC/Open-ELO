@@ -170,7 +170,6 @@ class LogisticSkillAdjuster(SkillAdjuster):
 
 
 class WeightedSkillAdjuster(SkillAdjuster):
-    log_factor = (sqrt(3) / pi)
 
     def __init__(self, mu: float, sig: float, sig_weight: float = 1) -> None:
         self.mu = mu
@@ -180,7 +179,7 @@ class WeightedSkillAdjuster(SkillAdjuster):
         return player_ratings
 
     def linear(self, player_ratings: np.ndarray) -> np.ndarray:
-        standardized = player_ratings / (self.mu + self.sig * (3. / LogisticSkillAdjuster.log_factor))  # assume the highest rank is 3 standard deviations away
+        standardized = player_ratings / (self.mu + self.sig)  # assume the highest rank is 3 standard deviations away
         return player_ratings * standardized
 
     def manual_weights(self, player_ratings: np.ndarray, weights: np.ndarray) -> np.ndarray:

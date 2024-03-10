@@ -119,8 +119,6 @@ class TeamAverageAggregationN(TeamRatingAggregation):
         Returns:
             :obj:`Rating`: Aggregated rating object containing `mu` and `sigma`.
         '''
-        if self.n > len(players):
-            raise IndexError()
         sorted_players = sorted(players, key=lambda player: player.approx_posterior.mu)
         n_players = sorted_players[-self.n:] if self.best else sorted_players[:self.n]
         return Rating(sum(player.approx_posterior.mu for player in n_players) / len(n_players),
@@ -158,8 +156,6 @@ class TeamSumAggregationN(TeamRatingAggregation):
         Returns:
             :obj:`Rating`: Aggregated rating object containing `mu` and `sigma`.
         '''
-        if self.n > len(players):
-            raise IndexError()
         sorted_players = sorted(players, key=lambda player: player.approx_posterior.mu)
         n_players = sorted_players[-self.n:] if self.best else sorted_players[:self.n]
         return Rating(sum(player.approx_posterior.mu for player in n_players),
