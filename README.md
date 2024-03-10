@@ -1,6 +1,8 @@
 # Open-ELO
 A set of elo systems written in Python. Includes a balancer and team skill adjuster.  Supports multithreading for both teams and individual players.
 
+![alt text](images/all_rating_systems.png)
+
 ## Usage
 
 Changes in data are stored in each individual player object.
@@ -23,9 +25,9 @@ For team games, the format is similar, but instead of grouping based on rank, yo
 #  Asumming you have references to player objects 'a', 'b', 'c', and 'd'
 standings = [[a, 0, 1], [b, 1, 2], [c, 0, 1], [d, 1, 2]]
 ```
-Shows that `a` and `c` are on team `0` with rank `0`, and `b` and `d` are on team `1` with rank `2`.
+Shows that `a` and `c` are on team `0` with rank `1`, and `b` and `d` are on team `1` with rank `2`.
 
-For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks match).
+For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks match).  Players with different teams and same rank are tied.  The only difference between individual players and team games is the add aggregation method.
 
 
 ## Elo Systems
@@ -121,3 +123,41 @@ For simplicity, you can set the team integer to the rank integer (assuming the t
 
 ### Trueskill
 ![alt text](images/Trueskill.png)
+
+# Aggregation
+
+Numerous aggregation methods have been created for your own needs. For example, if the best player has the highest determining factor of the teams performance, then the `max` aggregation might be more suitable for the domain. The most common aggregation for teams is the summation aggregation of ratings and deviations:
+
+## Summation (sum of all players rating is team rating)
+$$ \mu_\tau = \sum_{i \in \tau}{\mu_i}, \space \sigma^2_{\tau} = \sum_{i \in \tau}{\sigma^2_i} $$
+
+## Average (average rating of players is team rating)
+
+$$ \mu_\tau = \frac{\sum_{i \in \tau}{\mu_i}}{|\tau|}, \space \sigma^2_{\tau} = \frac{\sum_{i \in \tau}{\sigma^2_i}}{|\tau|}  $$
+
+## Maximum (best player rating is the team rating)
+
+$$ \mu_\tau = \mathrm{max}({\mu_i, \mu_{i+1}, ..., \mu_{n}}), \space \sigma^2_{\tau} = \mathrm{max}({\sigma^2_i, \sigma^2_{i+1}, ..., \sigma^2_{n}})  $$
+
+## Minimum (worst player rating is the team rating)
+
+$$ \mu_\tau = \mathrm{min}({\mu_i, \mu_{i+1}, ..., \mu_{n}}), \space \sigma^2_{\tau} = \mathrm{min}({\sigma^2_i, \sigma^2_{i+1}, ..., \sigma^2_{n}})  $$
+
+## N-Summation (sum of n best/worst players is team rating)
+
+Same as above, except it is the best/worst n players.
+
+## N-Average (average of n best/worst players is team rating)
+
+Same as above, except it is the best/worst n players.
+
+
+
+
+# Weighted Skill Adjuster
+
+Sometimes a domain is more heavily weighed by player skills.  The weighted skill adjuster adjusts the skill of the team by adjusting the skill of the player.
+
+> Can be used with the balancer to balance teams for the domain.
+
+![alt text](images/Weighted_Skill_Adjuster.png)
