@@ -50,7 +50,8 @@ def cmp_by_bucket(a: float, b: float, width: float) -> Ordering:
             width (:obj:`float`): Width of the bucket.
 
         Returns:
-            :obj:`Ordering`
+            :obj:`Ordering`: Return an ordering according to
+            `a` and `b`.
 
     '''
     return Ordering.cmp(bucket(a, width), bucket(b, width))

@@ -7,8 +7,9 @@ from .player import Player
 from .term import TanhTerm
 
 
-__all__ = ['convert_placement_to_standings', 
-           'ContestRatingParams']
+__all__ = ['convert_placement_to_standings',
+           'ContestRatingParams',
+           'EloMMRVariant']
 
 
 Standings = list[tuple[Player, int, int]]
@@ -161,7 +162,7 @@ def find_left_partial(rankings: list[Any], rank: int, key: Callable[..., int]) -
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find the partial.
+        rank (:obj:`int`): Rank to find the partial.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -189,7 +190,7 @@ def find_right_partial(rankings: list[Any], rank: int, key: Callable[..., int]) 
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find the partial.
+        rank (:obj:`int`): Rank to find the partial.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -217,7 +218,7 @@ def total_partial(rankings: list[Any], rank: int, key: Callable[..., int]) -> li
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find the partial.
+        rank (:obj:`int`): Rank to find the partial.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -235,7 +236,7 @@ def ranks_lt(rankings: list[Any], rank: int, key: Callable[..., int]) -> list[An
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find sub array less than this value.
+        rank (:obj:`int`): Rank to find sub array less than this value.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -256,7 +257,7 @@ def ranks_le(rankings: list[Any], rank: int, key: Callable[..., int]) -> list[An
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find sub array less than or equal to this value.
+        rank (:obj:`int`): Rank to find sub array less than or equal to this value.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -277,7 +278,7 @@ def ranks_gt(rankings: list[Any], rank: int, key: Callable[..., int]) -> list[An
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find sub array greater than this value.
+        rank (:obj:`int`): Rank to find sub array greater than this value.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -298,7 +299,7 @@ def ranks_ge(rankings: list[Any], rank: int, key: Callable[..., int]) -> list[An
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find sub array greater than or equal to this value.
+        rank (:obj:`int`): Rank to find sub array greater than or equal to this value.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 
@@ -319,7 +320,7 @@ def ranks_eq(rankings: list[Any], rank: int, key: Callable[..., int]) -> list[An
     Args:
         rankings (:obj:`list[Any]`): List of rankings.
 
-        rank (:obj:`int`) Rank to find sub array less than this value.
+        rank (:obj:`int`): Rank to find sub array less than this value.
 
         key (:obj:`Callable[..., int]`): function to compare the rankings and rank.
 

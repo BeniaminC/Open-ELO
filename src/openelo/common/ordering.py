@@ -5,7 +5,7 @@ from typing import Any, Self
 class Ordering(IntEnum):
     '''
     An integer enumerator between -1 and 1 for ordering. Values
-    are LESS (-1), EQUAL (0), and GREATER (1).
+    are `LESS` (-1), `EQUAL` (0), and `GREATER` (1).
     '''
     LESS = -1
     EQUAL = 0

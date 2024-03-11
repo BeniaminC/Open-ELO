@@ -1,4 +1,4 @@
-# Open-ELO
+# Open-ELO (Beta Stage - v0.0.2)
 A set of elo systems written in Python. Includes a balancer and team skill adjuster.  Supports multithreading for both teams and individual players.
 
 ![alt text](images/all_rating_systems.png)

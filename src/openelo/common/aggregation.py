@@ -6,11 +6,11 @@ from .player import Player
 from .term import Rating
 
 
-__all__ = ['TeamSumAggregation', 
-           'TeamAverageAggregation', 
-           'TeamMaxAggregation', 
-           'TeamMinAggregation', 
-           'TeamAverageAggregationN', 
+__all__ = ['TeamSumAggregation',
+           'TeamAverageAggregation',
+           'TeamMaxAggregation',
+           'TeamMinAggregation',
+           'TeamAverageAggregationN',
            'TeamSumAggregationN']
 
 
@@ -107,7 +107,7 @@ class TeamAverageAggregationN(TeamRatingAggregation):
         Args:
             n (:obj:`int`): The number of players per team to aggregate.
 
-            best (:obj:`bool`): Compute the best players (default `True`).
+            best (:obj:`bool`): Compute the best `n` players (default `True`).
 
         Returns:
             :obj:`None`

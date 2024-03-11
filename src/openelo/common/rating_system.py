@@ -18,7 +18,7 @@ class RatingSystem(ABC):
             params (:obj:`ContestRatingParams`): Contest rating parameters for individual
             contest.
 
-            standings(:obj:`Standings`): List of `Player` objects with
+            standings (:obj:`Standings`): List of `Player` objects with
             their standings (start, end).
         '''
         pass
@@ -34,7 +34,7 @@ class RatingSystem(ABC):
             standings (:obj:`Standings`): List of `Player` objects with
             their standings (start, end).
 
-            contest_time(:obj:`int`): Contest time (in seconds).
+            contest_time (:obj:`int`): Contest time (in seconds).
         Returns:
             :obj:`None`
         '''

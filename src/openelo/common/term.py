@@ -20,11 +20,11 @@ class Term(ABC):
         Abstract method to be defined.
 
         Args:
-            x :obj:`float`: Scalar value for scalar minimization.
+            x (:obj:`float`): Scalar value for scalar minimization.
 
-            order :obj:`Ordering`: Relative ordering.
+            order (:obj:`Ordering`): Relative ordering.
 
-            split_ties :obj:`bool`: Boolean to split ties to evaluate to half a win and half a loss.
+            split_ties (:obj:`bool`): Boolean to split ties to evaluate to half a win and half a loss.
 
         Return:
             :obj:tuple[float, float]: Returns the value and its respective derivative.
@@ -36,13 +36,13 @@ class Term(ABC):
         Evaulate a list of ranks according to a scalar value `x` relative to a specific rank `my_rank`.
 
         Args:
-            x :obj:`float`: Scalar value for scalar minimization.
+            x (:obj:`float`): Scalar value for scalar minimization.
 
-            ranks :obj:`list[int]`: A list of ranks.
+            ranks (:obj:`list[int]`): A list of ranks.
 
-            my_rank :obj:`int`: Rank to evalulate the minimization relative to the ranks in the list.
+            my_rank (:obj:`int`): Rank to evalulate the minimization relative to the ranks in the list.
 
-            split_ties :obj:`bool`: Boolean to split ties to evaluate to half a win and half a loss.
+            split_ties (:obj:`bool`): Boolean to split ties to evaluate to half a win and half a loss.
 
         Return:
             :obj:tuple[float, float]: Returns the value and its respective derivative.
@@ -74,9 +74,9 @@ class Term(ABC):
         Auxillary method to find the indices of equal rank.
 
         Args:
-             ranks :obj:`list[int]`: A list of ranks.
+             ranks (:obj:`list[int]`): A list of ranks.
 
-             my_rank :obj:`int`: Rank to find equivalent ranks.
+             my_rank (:obj:`int`): Rank to find equivalent ranks.
 
         Returns:
             :obj:`tuplep[int, int]`: Indices range of equal rank.
@@ -100,11 +100,11 @@ class Rating(Term):
         cdf and pdf to compute value.
 
         Args:
-            x :obj:`float`: Scalar value for scalar minimization.
+            x (:obj:`float`): Scalar value for scalar minimization.
 
-            order :obj:`Ordering`: Relative ordering.
+            order (:obj:`Ordering`): Relative ordering.
 
-            split_ties :obj:`bool`: Boolean to split ties to evaluate to half a win and half a loss.
+            split_ties (:obj:`bool`): Boolean to split ties to evaluate to half a win and half a loss.
 
         Return:
             :obj:tuple[float, float]: Returns the value and its respective derivative.
@@ -141,7 +141,7 @@ class Rating(Term):
         Compute the new deviation with noise.
 
         Args:
-            sig_noise :obj:`float`: Noise to add to the rating deviation.
+            sig_noise (:obj:`float`): Noise to add to the rating deviation.
 
         Returns:
             :obj:`Rating`: New Rating with added noise.
@@ -154,9 +154,9 @@ class Rating(Term):
         This change is proportional to the `decay`.
 
         Args:
-            decay :obj:`float`: Decay rate to move towards noise.
+            decay (:obj:`float`): Decay rate to move towards noise.
 
-            linit :obj:`Rating`: Rating to move towards.
+            linit (:obj:`Rating`): Rating to move towards.
 
         Returns:
             :obj:`Rating`: New Rating towards the limit.
@@ -178,11 +178,11 @@ class TanhTerm(Term):
         cdf and pdf to compute value.
 
         Args:
-            x :obj:`float`: Scalar value for scalar minimization.
+            x (:obj:`float`): Scalar value for scalar minimization.
 
-            order :obj:`Ordering`: Relative ordering.
+            order (:obj:`Ordering`): Relative ordering.
 
-            split_ties :obj:`bool`: Boolean to split ties to evaluate to half a win and half a loss.
+            split_ties (:obj:`bool`): Boolean to split ties to evaluate to half a win and half a loss.
 
         Return:
             :obj:tuple[float, float]: Returns the value and its respective derivative.
@@ -205,7 +205,7 @@ class TanhTerm(Term):
         Create a new `TanhTerm` from rating.
 
         Args:
-            rating :obj:`Rating`
+            rating (:obj:`Rating`)
 
         Returns:
             :obj:`TanhTerm`
@@ -227,7 +227,7 @@ class TanhTerm(Term):
         Given a scalar value, return the value and derivative.
 
         Args:
-            x :obj:`float`: Value
+            x (:obj:`float`): Value
         
         Returns:
             :obj:`tuple[float, float]`: Computed value with derivative.
@@ -242,13 +242,13 @@ class TanhTerm(Term):
         Compute the value and derivative of ranks equal to rank.
 
         Args:
-            x :obj:`float`: Scalar value for scalar minimization.
+            x (:obj:`float`): Scalar value for scalar minimization.
 
-            ranks :obj:`list[int]`: A list of ranks.
+            ranks (:obj:`list[int])`: A list of ranks.
 
-            my_rank :obj:`int`: Rank to evalulate the minimization relative to the ranks in the list.
+            my_rank (:obj:`int`): Rank to evalulate the minimization relative to the ranks in the list.
 
-            split_ties :obj:`bool`: Boolean to split ties to evaluate to half a win and half a loss.
+            split_ties (:obj:`bool`): Boolean to split ties to evaluate to half a win and half a loss.
 
         Return:
             :obj:tuple[float, float]: Returns the value and its respective derivative.
@@ -273,11 +273,11 @@ def robust_average(all_ratings: Iterable[TanhTerm], offset: float, slope: float)
     method to solve for a scalar function.
 
     Args:
-        all_ratings :obj:`Iterable[TanhTerm]`: All the tanh terms.
+        all_ratings (:obj:`Iterable[TanhTerm])`: All the tanh terms.
 
-        offset :obj:`float`: The starting offset of the reduction.
+        offset (:obj:`float`): The starting offset of the reduction.
 
-        slope :obj:`float`: The starting slope (or derivative) of the reduction.
+        slope (:obj:`float`): The starting slope (or derivative) of the reduction.
     '''
     if isinstance(all_ratings, (Iterator, Generator)):
         raise TypeError('robust_average must accept an iterable which isn\'t consumed (i.e. a list or tuple).')

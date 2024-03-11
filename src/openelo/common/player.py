@@ -5,7 +5,7 @@ from .constants import DEFAULT_MU, DEFAULT_SIG, DEFAULT_SIG_LIMIT
 from .term import Rating, TanhTerm, robust_average
 
 
-__all__ = ['Player', 
+__all__ = ['Player',
            'PlayersByName']
 
 
@@ -83,7 +83,7 @@ class Player:
         played if a history event has already been appended.
 
         Returns:
-            :obj:`int`: 
+            :obj:`int`: The number of games excluding the unrecorded initialized game.
         '''
         return len(self.event_history) - 1
 
@@ -189,7 +189,7 @@ class Player:
         Clears all the logistic factors.
 
         Args:
-            sig_noise :obj:`float`: the noise added to the approximate posterior.
+            sig_noise (:obj:`float`): the noise added to the approximate posterior.
         
         Return::
             :obj:`None`
@@ -204,7 +204,7 @@ class Player:
         Adds noise to the normal factor from the logstic factors.
 
         Args:
-            sig_noise :obj:`float`: the noise added to the approximate posterior and changes the weight
+            sig_noise (:obj:`float`): the noise added to the approximate posterior and changes the weight
             of each logistic factor.
 
         Returns:
@@ -223,10 +223,10 @@ class Player:
         factors to the normal (Gaussian) factors.
 
         Args:
-            sig_noise :obj:`float`: the noise added to the approximate posterior and changes the weight
+            sig_noise (:obj:`float`): the noise added to the approximate posterior and changes the weight
             of each logistic factor.
 
-            transfer_speed :obj:`float`: Transfer speed of weights from the logistic factors to the normal
+            transfer_speed (:obj:`float`): Transfer speed of weights from the logistic factors to the normal
             (Gassian) factor.
         
         Returns:
@@ -251,9 +251,9 @@ class Player:
         Initializes a player event with the `lo` placement and the contest time.  The values initialized are placeholders (zeroes).
 
         Args:
-            lo :obj:`int`: The placement of the player.
+            lo (:obj:`int`): The placement of the player.
 
-            contest_time :obj:`int`: The contest time of the event.
+            contest_time (:obj:`int`): The contest time of the event.
         
         Returns:
             :obj:`None`
