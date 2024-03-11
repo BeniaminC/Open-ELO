@@ -9,7 +9,7 @@ setup(
     description='A set of elo systems written in Python.',
     packages=find_packages(),
     classifiers=[
-        'Programming Langauges :: Python :: 3',
+        'Programming Langauge :: Python :: 3',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent'
     ],
