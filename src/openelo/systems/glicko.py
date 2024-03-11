@@ -4,8 +4,8 @@ from math import comb, pi
 
 from ..common.aggregation import TeamRatingAggregation
 from ..common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
-                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
-                                          GLICKO_Q, TANH_MULTIPLIER)
+                                DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
+                                GLICKO_Q, TANH_MULTIPLIER)
 from ..common.common import (ContestRatingParams, Standings)
 from ..common.numericals import standard_logistic_cdf
 from ..common.ordering import Ordering

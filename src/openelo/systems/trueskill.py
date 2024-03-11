@@ -9,8 +9,8 @@ import trueskill as ts
 from ..common.aggregation import TeamRatingAggregation
 from ..common.common import (ContestRatingParams, Standings)
 from ..common.constants import (TS_MU, TS_SIG, TS_BETA, TS_TAU,
-                                          TS_DRAW_PROB, TS_BACKEND, DEFAULT_WEIGHT_LIMIT,
-                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
+                                TS_DRAW_PROB, TS_BACKEND, DEFAULT_WEIGHT_LIMIT,
+                                DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
 from ..common.player import Player
 from ..common.rating_system import RatingSystem
 from ..common.team_rating_system import TeamRatingSystem

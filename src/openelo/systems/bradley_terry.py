@@ -9,7 +9,8 @@ from math import exp
 from operator import itemgetter
 
 from ..common.aggregation import TeamRatingAggregation
-from ..common.constants import DEFAULT_BETA, DEFAULT_DRIFTS_PER_DAY, DEFAULT_SIG_LIMIT, DEFAULT_WEIGHT_LIMIT
+from ..common.constants import (DEFAULT_BETA, DEFAULT_DRIFTS_PER_DAY,
+                                DEFAULT_SIG_LIMIT, DEFAULT_WEIGHT_LIMIT)
 from ..common.common import ContestRatingParams, Standings, total_partial
 from ..common.numericals import (standard_logistic_cdf)
 from ..common.ordering import Ordering
@@ -17,6 +18,7 @@ from ..common.player import Player
 from ..common.rating_system import RatingSystem
 from ..common.team_rating_system import TeamRating, TeamRatingSystem
 from ..common.term import Rating
+
 
 __all__ = ['BradleyTerry', 
            'BradleyTerryPartial']

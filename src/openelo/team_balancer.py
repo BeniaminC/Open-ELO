@@ -14,7 +14,8 @@ import numpy.typing as npt
 from nptyping import Float32, Int32, NDArray, Shape, Structure
 
 
-__all__ = ['EloTeamBalancer']
+__all__ = ['EloTeamBalancerParams',
+           'EloTeamBalancer']
 
 
 player_np_dt = np.dtype([('player', np.object_), ('rating', np.float32)])

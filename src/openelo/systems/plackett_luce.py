@@ -5,7 +5,7 @@ from math import exp
 
 from ..common.aggregation import TeamRatingAggregation
 from ..common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
-                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
+                                DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
 from ..common.common import (ContestRatingParams, ranks_ge, Standings)
 from ..common.ordering import Ordering
 from ..common.player import Player

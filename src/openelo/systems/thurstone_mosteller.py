@@ -4,8 +4,8 @@ from operator import itemgetter
 
 from ..common.aggregation import TeamRatingAggregation
 from ..common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
-                                          DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
-                                          DRAW_PROBABILITY)
+                                DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
+                                DRAW_PROBABILITY)
 from ..common.common import (ContestRatingParams, total_partial)
 from ..common.numericals import (standard_normal_cdf, standard_normal_pdf)
 from ..common.ordering import Ordering

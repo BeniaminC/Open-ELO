@@ -10,6 +10,7 @@ from ..common.player import Player
 from ..common.rating_system import RatingSystem
 from ..common.term import Rating, TanhTerm, robust_average
 
+
 __all__ = ['Codeforce']
 
 

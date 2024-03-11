@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from ..common.common import (ContestRatingParams, Standings)
 from ..common.numericals import (clamp, standard_normal_cdf,
-                                           standard_normal_cdf_inv)
+                                 standard_normal_cdf_inv)
 from ..common.player import Player
 from ..common.rating_system import RatingSystem
 from ..common.term import Rating

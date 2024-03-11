@@ -10,7 +10,7 @@ from ..common.team_rating_system import TeamRating, TeamRatingSystem
 from ..common.term import Rating
 
 
-__all__ = ['KFactor', 
+__all__ = ['KFactor',
            'Elo']
 
 
