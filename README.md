@@ -3,6 +3,10 @@ A set of elo systems written in Python. Includes a balancer and team skill adjus
 
 ![alt text](images/all_rating_systems.png)
 
+## Installation
+
+`pip install openelo`
+
 ## Usage
 
 Changes in data are stored in each individual player object.
@@ -28,6 +32,134 @@ standings = [[a, 0, 1], [b, 1, 2], [c, 0, 1], [d, 1, 2]]
 Shows that `a` and `c` are on team `0` with rank `1`, and `b` and `d` are on team `1` with rank `2`.
 
 For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks match).  Players with different teams and same rank are tied.  The only difference between individual players and team games is the add aggregation method.
+
+
+## Full example
+
+
+```py
+from datetime import datetime, timezone
+from operator import itemgetter
+from random import sample
+from statistics import mean
+
+import numpy as np
+from matplotlib import pyplot as plt
+from numpy.random import logistic
+
+from openelo import BradleyTerry, Player, ContestRatingParams, EloTeamBalancer, EloTeamBalancerParams, generate_logistic_ratings, TeamSumAggregation
+
+# create our starting contest time (in seconds)
+contest_time = round(datetime.now(timezone.utc).timestamp())
+
+# create our rating system
+bradley_terry = BradleyTerry(weight_limit=1., sig_limit=40., drift_per_day=10./7.)
+
+contest_rating_params = ContestRatingParams(
+    weight=1.,
+    # perf_ceiling=3000.,
+    # perf_floor=0.
+    )
+
+balancer_params = EloTeamBalancerParams(
+    top_k=126,
+    elo_diff=500.,
+    player_balance=True,
+    new_player_offset=0)
+elo_team_balancer = EloTeamBalancer(settings=balancer_params)
+
+# 100 players
+num_players = 20
+num_games_per_player = 100
+players_per_game = 10
+
+# we assume the skills == performance
+player_true_skill = generate_logistic_ratings(num_players, 0., 3000., 1500., 500.)  # assume the skill of players
+# player_true_skill = np.full(shape=(num_players,), fill_value=1500.)
+player_true_skill = np.sort(player_true_skill)[::-1]  # order the skills of each player, in descending order
+# we can assume each player has a priors of their true skill
+player_ratings = np.array([Player.with_rating(1500., 500., update_time=0) for skill in player_true_skill], dtype=object)
+imbalanced_count = 0
+for w in range(num_games_per_player*num_players//(players_per_game)):
+    #update time, assume 10 games per day
+    if not w % 10:
+        contest_time += (86400)
+    # same our players (10-16 players total, half per team)
+    idx_sample = np.array(sample(range(0, num_players), k=players_per_game))
+    # pull those players
+    players = player_ratings[idx_sample]
+    # balance the teams
+    # for each player, give them a dummy hash (this is needed because they may have the same rating)
+    players_for_balancer = [(str(i), player.approx_posterior.mu) for i, player in enumerate(players)]
+    elo_team_balancer.set_players(players_for_balancer)
+    # indices of balanced players
+    elo_info = elo_team_balancer.create_elo_info()
+    if not len(elo_info['all_constraints_ind']):  # if we can't find a balanced lobby, continue
+        imbalanced_count += 1
+        continue
+
+    balanced_indices = elo_info['games_combinations_ind'][elo_info['all_constraints_ind']]
+    sorted_stats_ind = np.argsort(elo_info['game_statistics'][elo_info['all_constraints_ind']][:, 5])
+    sorted_balanced_indices = balanced_indices[sorted_stats_ind]
+    best_game_indices = sorted_balanced_indices[0]
+
+    player_skills = np.array([skill for skill in player_true_skill[idx_sample]])
+    sorted_ratings = np.argsort(player_skills)[::-1]
+    outer_indices = idx_sample[sorted_ratings]
+
+    outer_indices0, outer_indices1 = idx_sample[best_game_indices[0]], idx_sample[best_game_indices[1]]  # BALANCED TEAMS
+    # outer_indices0, outer_indices1 = idx_sample[0:5], idx_sample[5:10]  # RANDOM TEAMS
+    # outer_indices0, outer_indices1 = outer_indices[0:5], outer_indices[5:10]  # STACKED TEAMS
+
+    # choose 10 players, 5 for each team
+    team1, team2 = player_ratings[outer_indices0], player_ratings[outer_indices1]
+    # we get the priors for each teammate, thus assuming their performance order.
+    inter_team_perf1, inter_team_perf2 = np.array([player.approx_posterior.mu for player in team1]), np.array([player.approx_posterior.mu for player in team2])
+    # get the indices of each teammate based on priors
+    inter_team1_idx = np.argsort(inter_team_perf1)[::-1]
+    inter_team2_idx = np.argsort(inter_team_perf2)[::-1]
+    # get the true skill of each teammate for simulated win/loss
+    team1_true_skill_sum, team2_true_skill_sum = np.sum(logistic(player_true_skill[outer_indices0], 80.)), np.sum(logistic(player_true_skill[outer_indices1], 80.))
+    # simulate teams winning based on the sum of the performances
+
+    if team1_true_skill_sum > team2_true_skill_sum:
+        # order the players in each team based on random performances
+        standings = [(player, 1, 1) for i, player in enumerate(team1[inter_team1_idx])] + [(player, 2, 2) for i, player in enumerate(team2[inter_team2_idx])]
+    else:
+        standings = [(player, 1, 1) for i, player in enumerate(team2[inter_team2_idx])] + [(player, 2, 2) for i, player in enumerate(team1[inter_team1_idx])]
+    found_id = set()
+    for i in range(len(standings)-1, -1, -1):
+        player, _, _ = standings[i]
+        if id(player) in found_id:
+            del standings[i]
+        else:
+            found_id.add(id(player))
+    bradley_terry.team_round_update(contest_rating_params, standings, TeamSumAggregation(), contest_time=contest_time)
+    if not w % 100:
+        print(f'Completed {w}')
+
+# print the game results
+player_name_rating = list((player, rating.approx_posterior.mu) for player, rating in enumerate(player_ratings))
+player_name_rating.sort(key=itemgetter(1))
+print(f'MEAN: {mean([x for _, x in player_name_rating])}')
+
+best_player = player_ratings[0]
+for event in best_player.event_history:
+    print(f"{event.rating_mu}, {event.rating_sig}, {event.perf_score}, {event.place}")
+print('DIFFERENCE OF COMPUTED SKILL AND THEORETICAL SKILL: ', np.sum(np.abs(player_true_skill - np.array([rating.approx_posterior.mu for rating in player_ratings]))))
+print(f'GAMES IMBALANCED PERCENT: {imbalanced_count / (num_games_per_player*num_players) * 100}%')
+
+fig, axes = plt.subplots(1, 2)
+fig.suptitle('Bradley-Terry Rating System of Balanced Games')
+
+for i, player in enumerate(player_ratings):
+    axes[0].plot([history.rating_mu for history in player.event_history])
+    axes[0].set_title('Rating (mu)')
+    axes[1].plot([history.rating_sig for history in player.event_history])
+    axes[1].set_title('Deviations (sig)')
+
+plt.show()
+```
 
 
 ## Elo Systems
