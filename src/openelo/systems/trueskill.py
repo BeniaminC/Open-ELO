@@ -17,7 +17,7 @@ from ..common.team_rating_system import TeamRatingSystem
 from ..common.term import Rating
 
 
-__all__ = ['Trueskill']
+__all__ = ['TrueSkill']
 
 
 TeamRating = namedtuple('TeamRating', ['team', 'rank'])

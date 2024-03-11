@@ -4,7 +4,9 @@ from math import pi, sqrt
 import numpy as np
 
 
-__all__ = ['NormalSkillAdjuster', 'LogisticSkillAdjuster', 'WeightedSkillAdjuster']
+__all__ = ['NormalSkillAdjuster', 
+           'LogisticSkillAdjuster', 
+           'WeightedSkillAdjuster']
 
 class SkillAdjuster(ABC):
     @abstractmethod
