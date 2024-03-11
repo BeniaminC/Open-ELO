@@ -9,9 +9,9 @@ setup(
     description='A set of elo systems written in Python.',
     packages=find_packages(),
     classifiers=[
-        'Programming Langauge :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent'
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
     install_requires=['numpy', 'scipy', 'nptyping', 'trueskill']
 )
