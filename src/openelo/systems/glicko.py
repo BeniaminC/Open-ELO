@@ -2,18 +2,20 @@ import concurrent.futures
 from dataclasses import dataclass, field
 from math import comb, pi
 
-from mmr_systems.common.aggregation import TeamRatingAggregation
-from mmr_systems.common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
+from ..common.aggregation import TeamRatingAggregation
+from ..common.constants import (DEFAULT_BETA, DEFAULT_WEIGHT_LIMIT, 
                                           DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY, 
                                           GLICKO_Q, TANH_MULTIPLIER)
-from mmr_systems.common.common import (ContestRatingParams, Standings)
-from mmr_systems.common.numericals import standard_logistic_cdf
-from mmr_systems.common.ordering import Ordering
-from mmr_systems.common.player import Player
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
-from mmr_systems.common.term import Rating
+from ..common.common import (ContestRatingParams, Standings)
+from ..common.numericals import standard_logistic_cdf
+from ..common.ordering import Ordering
+from ..common.player import Player
+from ..common.rating_system import RatingSystem
+from ..common.team_rating_system import TeamRating, TeamRatingSystem
+from ..common.term import Rating
 
+
+__all__ = ['Glicko']
 
 
 @dataclass

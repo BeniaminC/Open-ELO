@@ -2,6 +2,15 @@ import numpy as np
 from scipy.stats import logistic, norm, rv_continuous, skewnorm
 
 
+__all__ = ['generate_normal_ratings_perc', 
+           'generate_logistic_ratings_perc', 
+           'generate_skewnormal_ratings_perc', 
+           'generate_normal_ratings', 
+           'generate_logistic_ratings',
+           'generate_skewnormal_ratings',
+           'MixtureModel']
+
+
 def generate_normal_ratings_perc(n: int,low_perc: float=0.01, hi_perc: float=0.99, mu: float=0., sig: float=1.):
     '''
     Generate a normal distribution based on percent range.

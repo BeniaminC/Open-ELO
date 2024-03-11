@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any, NamedTuple, TypedDict
 
-from mmr_systems.common.aggregation import TeamRatingAggregation
-from mmr_systems.common.common import ContestRatingParams, Standings
-from mmr_systems.common.player import Player
-from mmr_systems.common.term import Rating
+from .aggregation import TeamRatingAggregation
+from .common import ContestRatingParams, Standings
+from .player import Player
+from .term import Rating
 
 TeamInfo = TypedDict('TeamInfo', {'players': list, 'rank': int})
 

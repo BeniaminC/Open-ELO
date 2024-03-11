@@ -1,12 +1,15 @@
 import concurrent.futures
 from dataclasses import dataclass
 
-from mmr_systems.common.common import (ContestRatingParams, Standings)
-from mmr_systems.common.constants import (DEFAULT_BETA)
-from mmr_systems.common.numericals import standard_logistic_cdf
-from mmr_systems.common.player import Player
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.term import Rating
+from ..common.common import (ContestRatingParams, Standings)
+from ..common.constants import (DEFAULT_BETA)
+from ..common.numericals import standard_logistic_cdf
+from ..common.player import Player
+from ..common.rating_system import RatingSystem
+from ..common.term import Rating
+
+
+__all__ = ['EndureElo']
 
 
 @dataclass

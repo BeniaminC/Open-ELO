@@ -3,8 +3,13 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal, Optional
 
-from mmr_systems.common.player import Player
-from mmr_systems.common.term import TanhTerm
+from .player import Player
+from .term import TanhTerm
+
+
+__all__ = ['convert_placement_to_standings', 
+           'ContestRatingParams']
+
 
 Standings = list[tuple[Player, int, int]]
 
@@ -30,7 +35,7 @@ def convert_placement_to_standings(placements: list[tuple[Player, int]]) -> Stan
 
         placements = [('A', 0), ('B', 1), ('C', 1), ('D', 2)]
         conv_placements = convert_placement_to_standings(placements)
-        conv_placements  # --> [('A', 0, 0), ('B', 1, 2), ('C', 1, 2), ('D', 3)]
+        conv_placements  # --> [('A', 0, 0), ('B', 1, 2), ('C', 1, 2), ('D', 3, 3)]
     '''
     unique_placements = set()
     player_placements = defaultdict(list)

@@ -2,7 +2,7 @@ import math
 from typing import Callable
 from scipy.special import erfcinv
 
-from mmr_systems.common.constants import FRAC_2_SQRT_PI, SQRT_2, TANH_MULTIPLIER
+from .constants import FRAC_2_SQRT_PI, SQRT_2, TANH_MULTIPLIER
 
 
 def standard_logistic_pdf(z: float) -> float:

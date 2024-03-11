@@ -1,12 +1,15 @@
 import concurrent.futures
 from dataclasses import dataclass
 
-from mmr_systems.common.common import (ContestRatingParams, Standings)
-from mmr_systems.common.numericals import (clamp, standard_normal_cdf,
+from ..common.common import (ContestRatingParams, Standings)
+from ..common.numericals import (clamp, standard_normal_cdf,
                                            standard_normal_cdf_inv)
-from mmr_systems.common.player import Player
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.term import Rating
+from ..common.player import Player
+from ..common.rating_system import RatingSystem
+from ..common.term import Rating
+
+
+__all__ = ['Topcoder']
 
 
 @dataclass

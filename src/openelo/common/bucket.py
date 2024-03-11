@@ -1,4 +1,4 @@
-from mmr_systems.common.ordering import Ordering
+from .ordering import Ordering
 
 
 def bucket(a: float, width: float) -> int:

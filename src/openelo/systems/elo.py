@@ -3,11 +3,15 @@ from dataclasses import dataclass, field
 from math import comb
 from typing import NamedTuple
 
-from mmr_systems.common.aggregation import TeamRatingAggregation
-from mmr_systems.common.common import ContestRatingParams, Standings
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
-from mmr_systems.common.term import Rating
+from ..common.aggregation import TeamRatingAggregation
+from ..common.common import ContestRatingParams, Standings
+from ..common.rating_system import RatingSystem
+from ..common.team_rating_system import TeamRating, TeamRatingSystem
+from ..common.term import Rating
+
+
+__all__ = ['KFactor', 
+           'Elo']
 
 
 class KFactor(NamedTuple):

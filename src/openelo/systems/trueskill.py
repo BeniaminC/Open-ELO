@@ -6,18 +6,21 @@ from operator import itemgetter
 
 import trueskill as ts
 
-from mmr_systems.common.aggregation import TeamRatingAggregation
-from mmr_systems.common.common import (ContestRatingParams, Standings)
-from mmr_systems.common.constants import (TS_MU, TS_SIG, TS_BETA, TS_TAU,
+from ..common.aggregation import TeamRatingAggregation
+from ..common.common import (ContestRatingParams, Standings)
+from ..common.constants import (TS_MU, TS_SIG, TS_BETA, TS_TAU,
                                           TS_DRAW_PROB, TS_BACKEND, DEFAULT_WEIGHT_LIMIT,
                                           DEFAULT_SIG_LIMIT, DEFAULT_DRIFTS_PER_DAY)
-from mmr_systems.common.player import Player
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.team_rating_system import TeamRatingSystem
-from mmr_systems.common.term import Rating
+from ..common.player import Player
+from ..common.rating_system import RatingSystem
+from ..common.team_rating_system import TeamRatingSystem
+from ..common.term import Rating
+
+
+__all__ = ['Trueskill']
+
 
 TeamRating = namedtuple('TeamRating', ['team', 'rank'])
-
 
 @dataclass
 class TrueSkill(RatingSystem, TeamRatingSystem):

@@ -2,13 +2,15 @@ import concurrent.futures
 from dataclasses import dataclass
 
 
-from mmr_systems.common.aggregation import TeamRatingAggregation
-from mmr_systems.common.common import ContestRatingParams, Standings
-from mmr_systems.common.constants import DEFAULT_BETA, TANH_MULTIPLIER
-from mmr_systems.common.numericals import standard_logistic_cdf
-from mmr_systems.common.player import Player
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.term import Rating, TanhTerm, robust_average
+from ..common.aggregation import TeamRatingAggregation
+from ..common.common import ContestRatingParams, Standings
+from ..common.constants import DEFAULT_BETA, TANH_MULTIPLIER
+from ..common.numericals import standard_logistic_cdf
+from ..common.player import Player
+from ..common.rating_system import RatingSystem
+from ..common.term import Rating, TanhTerm, robust_average
+
+__all__ = ['Codeforce']
 
 
 @dataclass

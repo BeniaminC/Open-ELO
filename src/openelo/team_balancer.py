@@ -14,6 +14,9 @@ import numpy.typing as npt
 from nptyping import Float32, Int32, NDArray, Shape, Structure
 
 
+__all__ = ['EloTeamBalancer']
+
+
 player_np_dt = np.dtype([('player', np.object_), ('rating', np.float32)])
 Player = tuple[Hashable, float]
 Players = list[Player] | NDArray[Shape['*'], Structure['player: Object, rating: Float32']]

@@ -5,11 +5,9 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Generator, Iterable, Iterator, Self
 
-from mmr_systems.common.constants import BOUNDS, TANH_MULTIPLIER
-from mmr_systems.common.numericals import (solve_newton,
-                                           standard_normal_cdf,
-                                           standard_normal_pdf)
-from mmr_systems.common.ordering import Ordering
+from .constants import BOUNDS, TANH_MULTIPLIER
+from .numericals import (solve_newton, standard_normal_cdf, standard_normal_pdf)
+from .ordering import Ordering
 
 
 class Term(ABC):

@@ -6,18 +6,22 @@ from itertools import chain, groupby
 from operator import itemgetter
 from typing import Self
 
-from mmr_systems.common.aggregation import TeamRatingAggregation
-from mmr_systems.common.bucket import bucket, cmp_by_bucket, same_bucket
-from mmr_systems.common.constants import (BOUNDS, DEFAULT_WEIGHT_LIMIT, DEFAULT_SIG_LIMIT, 
+from ..common.aggregation import TeamRatingAggregation
+from ..common.bucket import bucket, cmp_by_bucket, same_bucket
+from ..common.constants import (BOUNDS, DEFAULT_WEIGHT_LIMIT, DEFAULT_SIG_LIMIT, 
                                           DEFAULT_DRIFTS_PER_DAY, DEFAULT_SPLIT_TIES, 
                                           INT_MAX, DEFAULT_TRANSFER_SPEED, FLOAT_MAX)
-from mmr_systems.common.common import (ContestRatingParams, EloMMRVariant, TanhTerm,
+from ..common.common import (ContestRatingParams, EloMMRVariant, TanhTerm,
                                        eval_equal, eval_grea, eval_less, Standings)
-from mmr_systems.common.numericals import (clamp, solve_newton)
-from mmr_systems.common.player import Player
-from mmr_systems.common.rating_system import RatingSystem
-from mmr_systems.common.team_rating_system import TeamRating, TeamRatingSystem
-from mmr_systems.common.term import Rating
+from ..common.numericals import (clamp, solve_newton)
+from ..common.player import Player
+from ..common.rating_system import RatingSystem
+from ..common.team_rating_system import TeamRating, TeamRatingSystem
+from ..common.term import Rating
+
+
+__all__ = ['SimpleEloMMR', 
+           'EloMMR']
 
 
 @dataclass

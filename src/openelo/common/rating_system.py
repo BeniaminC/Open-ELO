@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import concurrent.futures
 
-from mmr_systems.common.common import ContestRatingParams, Standings
-from mmr_systems.common.constants import SECS_PER_DAY
+from .common import ContestRatingParams, Standings
+from .constants import SECS_PER_DAY
 
 class RatingSystem(ABC):
     '''
