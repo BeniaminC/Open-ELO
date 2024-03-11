@@ -4,6 +4,7 @@ import concurrent.futures
 from .common import ContestRatingParams, Standings
 from .constants import SECS_PER_DAY
 
+
 class RatingSystem(ABC):
     '''
     Abstract base class for rating systems.

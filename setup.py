@@ -7,11 +7,12 @@ setup(
     author_email='benjamin.condrea@gmail.com',
     url='https://github.com/BeniaminC/Open-ELO',
     description='A set of elo systems written in Python.',
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={"":"src"},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['numpy', 'scipy', 'nptyping', 'trueskill']
+    install_requires=['numpy', 'scipy', 'nptyping', 'trueskill'],
 )
