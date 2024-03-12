@@ -24,7 +24,6 @@ class Glicko(RatingSystem, TeamRatingSystem):
     Glicko rating system.
     '''
     beta: float = DEFAULT_BETA
-    scaling: float = 400.
     weight_limit: float = DEFAULT_WEIGHT_LIMIT
     noob_delay: list[float] = field(default_factory=list)
     sig_limit: float = DEFAULT_SIG_LIMIT
@@ -87,23 +86,19 @@ class Glicko(RatingSystem, TeamRatingSystem):
                 executor.submit(_update_player_rating, rating, my_lo)
 
     @staticmethod
-    def _g(sig: float, q: float = GLICKO_Q):
-        return 1. / (((1 + 3 * q ** 2 * sig) / pi ** 2) ** 0.5)
+    def _g(sig_sq: float, sig_perf: float):
+        return 1. / ((sig_sq / sig_perf ** 2) ** 0.5)
 
     @staticmethod
-    def _pr_i(mu_i: float, mu_j: float, sig_sq_i: float, sig_sq_j: float, q: float, D: float):
-        inner_g = (sig_sq_i + sig_sq_j)
+    def _pr_i(mu_i: float, mu_j: float, sig_sq_i: float, sig_sq_j: float, sig_perf: float):
+        inner_g_sq = (sig_sq_i + sig_sq_j)
         diff_mu = (mu_i - mu_j)
-        denom = (1 + 10 ** ((-Glicko._g(inner_g, q) * diff_mu) / D))
+        denom = (1 + 10 ** ((-Glicko._g(inner_g_sq, sig_perf) * diff_mu) / sig_perf))
         return 1. / denom
 
     @staticmethod
     def _r(N: int, rank_i: int):
         return (N - rank_i) / comb(N, 2)
-
-    @staticmethod
-    def _d_sq_i(pr_i: float, sig_j: float):
-        return (Glicko._g(sig_j) ** 2) * pr_i * (1. - pr_i)
 
     def team_round_update(self,
                           params: ContestRatingParams,
@@ -122,13 +117,13 @@ class Glicko(RatingSystem, TeamRatingSystem):
         sig_perf = self.beta / ((self.weight_limit * params.weight) ** 0.5)
         gli_q = TANH_MULTIPLIER / sig_perf
         self.init_players_event(standings, contest_time=contest_time)
+
         def _update_player(player: Player):
             weight = self.compute_weight(params.weight, self.weight_limit, self.noob_delay, player.times_played_excl())
             sig_drift = self.compute_sig_drift(weight, self.sig_limit, self.drift_per_day, float(player.delta_time))
             player.add_noise_and_collapse(sig_drift)
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            for player, _, _ in standings:
-                executor.submit(_update_player, player)
+            executor.map(_update_player, (player for player, _, _ in standings))
         team_standings = self.convert_to_teams(standings)
         team_ratings = list(TeamRating(team, team_info['rank'], agg(team_info['players'])) for team, team_info in team_standings.items())
         team_ratings.sort(key=lambda team: team.rank)
@@ -139,39 +134,39 @@ class Glicko(RatingSystem, TeamRatingSystem):
             team_i_mu = team_i.rating.mu
             team_i_sig_sq = team_i.rating.sig
             pr_i = 0.
-            delta = 0.
-            mu_summation = 0.
-            num_players_in_team = len(team_standings[team_i.team])
+            info = 0.
+            update = 0.
+            team_i_players = team_standings[team_i.team]['players']
+            num_players_in_team = len(team_i_players)
             r_i = (N - relative_rank) / prob_denom
             for team_j in team_ratings:
                 if team_i is team_j:
                     continue
-                team_j_mu = team_j.rating.mu
                 team_j_sig_sq = team_j.rating.sig
-                pr_i += Glicko._pr_i(team_i_mu, team_j_mu, team_i_sig_sq, team_j_sig_sq, gli_q, self.scaling)
+                pr_i += Glicko._win_probability(sig_perf, team_i.rating, team_j.rating)
             pr_i /= prob_denom
             for team_j in team_ratings:
                 if team_i is team_j:
                     continue
-                team_j_sig = team_j.rating.sig
-                mu_summation += Glicko._g(team_j_sig) * (r_i - pr_i)
-            for team_j in team_ratings:
-                if team_i is team_j:
-                    continue
-                team_j_sig = team_j.rating.sig
-                delta += Glicko._g(team_j_sig) ** 2 * pr_i * (1 - pr_i)
-            d_sqr_i = 1. / ((gli_q ** 2) * delta)
-            team_new_mu = team_i_mu + (gli_q / ((1. / team_i_sig_sq) + (1. / d_sqr_i))) * mu_summation
-            team_new_sig_sq = (1. / ((1. / team_i_sig_sq) + (1. / d_sqr_i)))
-            team_new_sig = team_new_sig_sq ** 0.5
-            for player in team_standings[team_i.team]['players']:
+                team_j_sig_sq = team_j.rating.sig
+                g = Glicko._g(team_j_sig_sq, sig_perf)
+                info += g * g * pr_i * (1 - pr_i)
+                update += g * (r_i - pr_i)
+            info *= gli_q * gli_q
+            team_sig_sq = 1. / ((1. / team_i_sig_sq) + info)
+            update *= gli_q * team_sig_sq
+            team_sig = team_sig_sq ** 0.5
+            team_new_mu = team_i_mu + update
+
+            def _update_individual(player: Player):
                 old_mu = player.approx_posterior.mu
                 old_sig = player.approx_posterior.sig
                 w_mu = (1. / num_players_in_team)
                 w_sig = (1. / num_players_in_team)
                 new_mu = old_mu + w_mu * (team_new_mu - team_i_mu)
-                new_sig = max(1e-4, old_sig + w_sig * (team_new_sig - team_i_sig_sq ** 0.5))
+                new_sig = max(1e-4, old_sig + w_sig * (team_sig - team_i_sig_sq ** 0.5))
                 player.update_rating(Rating(new_mu, new_sig), 0)
-
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.map(_update_individual,  team_i_players)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(_update_player_rating, *zip(*((i+1, team_i) for i, team_i in enumerate(team_ratings))))
