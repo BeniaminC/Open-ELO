@@ -107,6 +107,7 @@ for w in range(num_games_per_player*num_players//(players_per_game)):
     sorted_ratings = np.argsort(player_skills)[::-1]
     outer_indices = idx_sample[sorted_ratings]
 
+    # comment/uncomment these to test out different indices (balanced teams, stacked teams, and balanced teams)
     outer_indices0, outer_indices1 = idx_sample[best_game_indices[0]], idx_sample[best_game_indices[1]]  # BALANCED TEAMS
     # outer_indices0, outer_indices1 = idx_sample[0:5], idx_sample[5:10]  # RANDOM TEAMS
     # outer_indices0, outer_indices1 = outer_indices[0:5], outer_indices[5:10]  # STACKED TEAMS
@@ -127,14 +128,9 @@ for w in range(num_games_per_player*num_players//(players_per_game)):
         standings = [(player, 1, 1) for i, player in enumerate(team1[inter_team1_idx])] + [(player, 2, 2) for i, player in enumerate(team2[inter_team2_idx])]
     else:
         standings = [(player, 1, 1) for i, player in enumerate(team2[inter_team2_idx])] + [(player, 2, 2) for i, player in enumerate(team1[inter_team1_idx])]
-    found_id = set()
-    for i in range(len(standings)-1, -1, -1):
-        player, _, _ = standings[i]
-        if id(player) in found_id:
-            del standings[i]
-        else:
-            found_id.add(id(player))
+
     bradley_terry.team_round_update(contest_rating_params, standings, TeamSumAggregation(), contest_time=contest_time)
+
     if not w % 100:
         print(f'Completed {w}')
 
@@ -295,3 +291,8 @@ Sometimes a domain is more heavily weighed by player skills.  The weighted skill
 > Can be used with the balancer to balance teams for the domain.
 
 ![alt text](images/Weighted_Skill_Adjuster.png)
+
+# TODO:
+
+- Glicko 2
+- Trueskill 2
