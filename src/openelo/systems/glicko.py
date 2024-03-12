@@ -87,14 +87,14 @@ class Glicko(RatingSystem, TeamRatingSystem):
 
     @staticmethod
     def _g(sig_sq: float, sig_perf: float):
-        return 1. / ((sig_sq / sig_perf ** 2) ** 0.5)
+        return 1. / (1 + (sig_sq / sig_perf ** 2)) ** 0.5
 
-    @staticmethod
-    def _pr_i(mu_i: float, mu_j: float, sig_sq_i: float, sig_sq_j: float, sig_perf: float):
-        inner_g_sq = (sig_sq_i + sig_sq_j)
-        diff_mu = (mu_i - mu_j)
-        denom = (1 + 10 ** ((-Glicko._g(inner_g_sq, sig_perf) * diff_mu) / sig_perf))
-        return 1. / denom
+    # @staticmethod
+    # def _pr_i(mu_i: float, mu_j: float, sig_sq_i: float, sig_sq_j: float, sig_perf: float, scale: float):
+    #     inner_g_sq = (sig_sq_i + sig_sq_j + sig_perf ** 2)
+    #     diff_mu = (mu_i - mu_j)
+    #     denom = (1 + 10 ** ((-Glicko._g(inner_g_sq, sig_perf) * diff_mu) / scale))
+    #     return 1. / denom
 
     @staticmethod
     def _r(N: int, rank_i: int):
@@ -143,7 +143,7 @@ class Glicko(RatingSystem, TeamRatingSystem):
                 if team_i is team_j:
                     continue
                 team_j_sig_sq = team_j.rating.sig
-                pr_i += Glicko._win_probability(sig_perf, team_i.rating, team_j.rating)
+                pr_i += Glicko._win_probability(sig_perf, team_i.rating, team_j.rating)  # TODO: make parameter for scale factor
             pr_i /= prob_denom
             for team_j in team_ratings:
                 if team_i is team_j:
@@ -153,18 +153,18 @@ class Glicko(RatingSystem, TeamRatingSystem):
                 info += g * g * pr_i * (1 - pr_i)
                 update += g * (r_i - pr_i)
             info *= gli_q * gli_q
-            team_sig_sq = 1. / ((1. / team_i_sig_sq) + info)
-            update *= gli_q * team_sig_sq
-            team_sig = team_sig_sq ** 0.5
+            team_new_sig_sq = 1. / ((1. / team_i_sig_sq) + info)
+            update *= gli_q * team_new_sig_sq
+            team_new_sig = team_new_sig_sq ** 0.5
             team_new_mu = team_i_mu + update
 
             def _update_individual(player: Player):
                 old_mu = player.approx_posterior.mu
                 old_sig = player.approx_posterior.sig
-                w_mu = (1. / num_players_in_team)
-                w_sig = (1. / num_players_in_team)
+                w_mu = 1. / num_players_in_team
+                w_sig = 1. / num_players_in_team
                 new_mu = old_mu + w_mu * (team_new_mu - team_i_mu)
-                new_sig = max(1e-4, old_sig + w_sig * (team_sig - team_i_sig_sq ** 0.5))
+                new_sig = max(1e-4, old_sig + w_sig * (team_new_sig - team_i_sig_sq ** 0.5))
                 player.update_rating(Rating(new_mu, new_sig), 0)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 executor.map(_update_individual,  team_i_players)
