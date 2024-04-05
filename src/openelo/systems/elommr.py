@@ -131,7 +131,6 @@ class SimpleEloMMR(RatingSystem, TeamRatingSystem):
         mul = 1. if self.split_ties else 2.
 
         def _update_player_rating(team_i: TeamRating):
-
             team_i_players = team_standings[team_i.team]['players']
             team_size = len(team_i_players)
             bounds = (1500 - (7500 * team_size), 1500 + (7500 * team_size))
@@ -148,13 +147,13 @@ class SimpleEloMMR(RatingSystem, TeamRatingSystem):
                     itr3)
                 acc = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), chained, (0., 0.))
                 return acc
-            mu_perf = clamp(solve_newton(bounds, f), params.perf_floor, params.perf_ceiling)
+            # TODO: make team performance clamp coincide with aggregation
+            team_mu_perf = clamp(solve_newton(bounds, f), params.perf_floor * team_size, params.perf_ceiling * team_size)
             team_i_mu = team_i.rating.mu
 
             def _update_individual(player: Player):
-
                 teammates_rating = team_i_mu - player.approx_posterior.mu
-                player_mu_perf = mu_perf - teammates_rating
+                player_mu_perf = clamp(team_mu_perf - teammates_rating, params.perf_floor, params.perf_ceiling)
                 weight = self.compute_weight(params.weight, self.weight_limit, self.noob_delay, player.times_played_excl())
                 sig_perf = self.compute_sig_perf(weight, self.sig_limit, self.drift_per_day)
                 player.update_rating_with_logistic(Rating(player_mu_perf, sig_perf), self.history_len)
@@ -401,11 +400,12 @@ class EloMMR(RatingSystem, TeamRatingSystem):
                         res.append(rating.evals(x, ranks, team_i.rank, self.split_ties))
                     acc = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), res, (0., 0.))
                     return acc
-                team_mu_perf = clamp(solve_newton(bounds, f), params.perf_floor, params.perf_ceiling)
+                # TODO: make team performance clamp coincide with aggregation
+                team_mu_perf = clamp(solve_newton(bounds, f), params.perf_floor * team_size, params.perf_ceiling * team_size)
 
             def _update_individual(player: Player):
                 teammates_rating = team_i_mu - player.approx_posterior.mu
-                player_mu_perf = team_mu_perf - teammates_rating
+                player_mu_perf = clamp(team_mu_perf - teammates_rating, params.perf_floor, params.perf_ceiling)
                 weight = self.compute_weight(params.weight, self.weight_limit, self.noob_delay, player.times_played_excl())
                 sig_perf = self.compute_sig_perf(weight, self.sig_limit, self.drift_per_day)
                 if self.variant == EloMMRVariant.gaussian():
