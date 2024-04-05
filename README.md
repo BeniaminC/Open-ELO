@@ -9,15 +9,16 @@ A set of elo systems written in Python. Includes a balancer and team skill adjus
 
 ## Usage
 
-Changes in data are stored in each individual player object.
+Changes in data are stored in each individual player object. To create the results of a round, create a `standings`, which is a list of tuples/lists containing players, first integer, and second integer. The integers represent differently for both individual rating system and team rating system:
 
 `round_update` for games with individual players and `team_round_update` for team games. The `standings` are slightly different for each. 
 
+> **Note: the individual groupings are 0-index**.
 ### For Individual Players
 
 For individual players, create groupings of players that are tied. For example:
 ```py
-#  Asumming you have references to player objects 'a', 'b', 'c', and 'd'
+#  Assuming you have references to player objects 'a', 'b', 'c', and 'd'
 standings = [[a, 0, 0], [b, 1, 2], [c, 1, 2], [d, 3, 3]]
 ```
 Shows that player `a` is first, players `b` and `c` are tied for second, and player `d` is third.
@@ -26,12 +27,12 @@ Shows that player `a` is first, players `b` and `c` are tied for second, and pla
 
 For team games, the format is similar, but instead of grouping based on rank, you group based on teams, where the first integer is `team` and second integer is `rank`. The rank for each team is set by the first player of a particular team:
 ```py
-#  Asumming you have references to player objects 'a', 'b', 'c', and 'd'
+#  Assuming you have references to player objects 'a', 'b', 'c', and 'd'
 standings = [[a, 0, 1], [b, 1, 2], [c, 0, 1], [d, 1, 2]]
 ```
 Shows that `a` and `c` are on team `0` with rank `1`, and `b` and `d` are on team `1` with rank `2`.
 
-For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks match).  Players with different teams and same rank are tied.  The only difference between individual players and team games is the add aggregation method.
+> For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks are in order).  Players with different teams and same rank are tied.  The only difference between individual players and team games is the add aggregation method.
 
 
 ## Full example
@@ -68,7 +69,7 @@ balancer_params = EloTeamBalancerParams(
     new_player_offset=0)
 elo_team_balancer = EloTeamBalancer(settings=balancer_params)
 
-# 100 players
+# 20 players, 10 per game, 5 per team
 num_players = 20
 num_games_per_player = 100
 players_per_game = 10
@@ -77,10 +78,12 @@ players_per_game = 10
 player_true_skill = generate_logistic_ratings(num_players, 0., 3000., 1500., 500.)  # assume the skill of players
 # player_true_skill = np.full(shape=(num_players,), fill_value=1500.)
 player_true_skill = np.sort(player_true_skill)[::-1]  # order the skills of each player, in descending order
-# we can assume each player has a priors of their true skill
+# player rating starts at median (1500).
 player_ratings = np.array([Player.with_rating(1500., 500., update_time=0) for skill in player_true_skill], dtype=object)
 imbalanced_count = 0
 for w in range(num_games_per_player*num_players//(players_per_game)):
+    if not w % 100:
+        print(f'Completed {w}')
     #update time, assume 10 games per day
     if not w % 10:
         contest_time += (86400)
@@ -131,8 +134,6 @@ for w in range(num_games_per_player*num_players//(players_per_game)):
 
     bradley_terry.team_round_update(contest_rating_params, standings, TeamSumAggregation(), contest_time=contest_time)
 
-    if not w % 100:
-        print(f'Completed {w}')
 
 # print the game results
 player_name_rating = list((player, rating.approx_posterior.mu) for player, rating in enumerate(player_ratings))
