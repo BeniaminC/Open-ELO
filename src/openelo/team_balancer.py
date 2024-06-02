@@ -40,9 +40,10 @@ class EloTeamBalancerParams:
     top_k: int = 50
     elo_diff: float = 200.
     player_balance: bool = True
-    new_player_offset: float = 0.
 
 
+# TODO: should make the class accept functions which filter combinations (a list of higher-order)
+# That way, we can add more constraints or less constraints
 class EloTeamBalancer:
     '''
     From a list of tuples or lists of Players (username, elo), create an instance
@@ -103,7 +104,6 @@ class EloTeamBalancer:
         teams0_comb_list = all_comb[:half_comb]
         teams1_not0_list = all_comb[half_comb:][::-1]
         stacked = np.stack((teams0_comb_list, teams1_not0_list), axis=1)
-
         return stacked
 
     @staticmethod
@@ -141,10 +141,8 @@ class EloTeamBalancer:
     @staticmethod
     def __get_elo_game_statistics(game: Game) -> GameStats:
         team0, team1 = game[0], game[1]
-        team0_elo_sum, team0_elo_avg = EloTeamBalancer.__get_elo_team_statistics(
-            team0)
-        team1_elo_sum, team1_elo_avg = EloTeamBalancer.__get_elo_team_statistics(
-            team1)
+        team0_elo_sum, team0_elo_avg = EloTeamBalancer.__get_elo_team_statistics(team0)
+        team1_elo_sum, team1_elo_avg = EloTeamBalancer.__get_elo_team_statistics(team1)
         elo_diff = team0_elo_sum - team1_elo_sum
         elo_abs = np.abs(elo_diff)
         game_stats = np.array([team0_elo_sum, team1_elo_sum, team0_elo_avg, team1_elo_avg, elo_diff, elo_abs], dtype=np.float32)
@@ -178,6 +176,11 @@ class EloTeamBalancer:
             raise InvalidPlayerCount(
                 f'Input player count is {n}. The player list must be even!')
         self.players = players
+
+    @staticmethod
+    def __all_constraints_intersection(indices: Iterable[Indices]) -> Indices:
+        intersect1d_unique = partial(np.intersect1d, assume_unique=True)
+        return reduce(intersect1d_unique, indices)
 
     def create_elo_info(self):
         '''
@@ -219,41 +222,47 @@ class EloTeamBalancer:
         n = len(self.players)
         team_balancer_info['game_combinations'] = game_comb
         team_balancer_info['games_combinations_ind'] = EloTeamBalancer.__create_team_combinations_ind(n)
-        team_balancer_info['best_games_partition_ind'] = EloTeamBalancer.__partition_k_teams_elo_ind(
-            game_comb, self.settings.top_k) if self.settings.top_k is not None else None
-        team_balancer_info['player_balance_ind'] = EloTeamBalancer.__players_balance_partition_constraint(
-            game_comb) if self.settings.player_balance is not False else None
-        team_balancer_info['elo_diff_ind'] = EloTeamBalancer.__teams_elo_difference_constraint(
-            game_comb, self.settings.elo_diff) if self.settings.elo_diff is not None else None
         all_ind = np.arange(len(game_comb))
-        intersect1d_unique = partial(np.intersect1d, assume_unique=True)
-        team_balancer_info['all_constraints_ind'] = reduce(intersect1d_unique, (team_balancer_info['best_games_partition_ind'] if self.settings.top_k is not None else all_ind,
-                                                                                team_balancer_info['player_balance_ind'] if self.settings.player_balance is not False else all_ind,
-                                                                                team_balancer_info['elo_diff_ind'] if self.settings.elo_diff is not None else all_ind))
+        indices = [all_ind]
+        if self.settings.top_k:
+            team_balancer_info['best_games_partition_ind'] = EloTeamBalancer.__partition_k_teams_elo_ind(game_comb, self.settings.top_k)
+            indices.append(team_balancer_info['best_games_partition_ind'])
+        else:
+            team_balancer_info['best_games_partition_ind'] = None
+        if self.settings.player_balance is not False:
+            team_balancer_info['player_balance_ind'] = EloTeamBalancer.__players_balance_partition_constraint(game_comb)
+            indices.append(team_balancer_info['player_balance_ind'])
+        else:
+            team_balancer_info['player_balance_ind'] = None
+        if self.settings.elo_diff is not None:
+            team_balancer_info['elo_diff_ind'] = EloTeamBalancer.__teams_elo_difference_constraint(game_comb, self.settings.elo_diff)
+            indices.append(team_balancer_info['elo_diff_ind'])
+        else:
+            team_balancer_info['elo_diff_ind'] = None
+        team_balancer_info['all_constraints_ind'] = self.__all_constraints_intersection(indices)
         return team_balancer_info
 
     @staticmethod
     def get_elo_game_statistics(game: Game) -> GameStats:
         return EloTeamBalancer.__get_elo_game_statistics(game)
 
-    def get_best_game(self) -> tuple[Game, GameStats]:
+    def get_best_game(self) -> tuple[Game, GameStats] | tuple[None, None]:
         elo_info = self.create_elo_info()
-        best_ind = np.argmin(elo_info['game_statistics'][elo_info['all_constraints_ind']][:, 5])
-        best_game = elo_info['game_combinations'][elo_info['all_constraints_ind']][best_ind]
-        best_stats = elo_info['game_statistics'][elo_info['all_constraints_ind']][best_ind]
-        return best_game, best_stats
-
-    def get_new_player_offset(self):
-        return self.settings.new_player_offset
+        if len(elo_info['all_constraints_ind']) > 0:
+            best_ind = np.argmin(elo_info['game_statistics'][elo_info['all_constraints_ind']][:, 5])
+            best_game = elo_info['game_combinations'][elo_info['all_constraints_ind']][best_ind]
+            best_stats = elo_info['game_statistics'][elo_info['all_constraints_ind']][best_ind]
+            return best_game, best_stats
+        return None, None
 
 
 def pretty_print_teams_string(games: list[Game], stats: list[GameStats]):
     string_list = []
     string_list.append('**Suggested Teams:**\n')
     for i, game in enumerate(games):
-        string_list.append(f'**Game #{i+1} (Elo Difference: {stats[i][5].astype(int)})\n------------------**')
+        string_list.append(f'**Game #{i+1} (MMR Difference: {stats[i][5].astype(int)})\n------------------**')
         for j, team in enumerate(game):
-            string_list.append(f'**Team {j+1} (Elo sum {stats[i][j].astype(int)} | Elo average {stats[i][2 + j].astype(int)})**')
+            string_list.append(f'**Team {j+1} (MMR sum {stats[i][j].astype(int)} | MMR average {stats[i][2 + j].astype(int)})**')
             players = '\n'.join([str(player) for player in team])
             string_list.append(players)
         string_list.append('\n')
@@ -263,14 +272,14 @@ def pretty_print_teams_string(games: list[Game], stats: list[GameStats]):
 def main():
     player_names = list('ABCDEFGHIJ')
     random_elos = np.random.normal(1500., 500., 10)
+    random_elos[0:2] = 1500.
+
     players_set = list(map(lambda x, y: (x, y), player_names, random_elos))
-    params = EloTeamBalancerParams(20, 200., True, 0.)
+    params = EloTeamBalancerParams(20, 200., True)
     elo_balancer = EloTeamBalancer(params)
     elo_balancer.set_players(players_set)
-    best_elo_balanced_teams = elo_balancer.create_elo_info()
-    sorted_stats_ind = np.argsort(best_elo_balanced_teams['game_statistics'][best_elo_balanced_teams['all_constraints_ind']][:, 5])
-    print(best_elo_balanced_teams['game_combinations'][best_elo_balanced_teams['all_constraints_ind']][sorted_stats_ind])
-    print(best_elo_balanced_teams['game_statistics'][best_elo_balanced_teams['all_constraints_ind']][sorted_stats_ind])
+    best_game, best_stats = elo_balancer.get_best_game()
+    print(best_game)
 
 
 if __name__ == '__main__':

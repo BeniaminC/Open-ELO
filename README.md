@@ -287,7 +287,7 @@ Same as above, except it is the best/worst n players.
 
 # Weighted Skill Adjuster
 
-Sometimes a domain is more heavily weighed by player skills.  The weighted skill adjuster adjusts the skill of the team by adjusting the skill of the player.
+Sometimes the domain of a rating system is more weighted based on the best or worst players.  The weighted skill adjuster adjusts the skill of the team by adjusting the skill of the player.
 
 > Can be used with the balancer to balance teams for the domain.
 
