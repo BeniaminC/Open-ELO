@@ -1,5 +1,8 @@
 # Open-ELO (Beta Stage - v0.0.2)
-A set of elo systems written in Python. Includes a balancer and team skill adjuster.  Supports multithreading for both teams and individual players.
+A set of elo systems written in Python. Includes a balancer and team skill adjuster.  Supports multithreading for both teams and individual players (Python 3.13+ no GIL).
+
+## Goal
+The goal of this project is to make open-sourced ELO systems more accessible.  Python is generally easier to read, and translating Python to other programming languages or translating them to utilize SIMD/CUDA is much easier.  A CUDA BLAS version is in alpha stage and is not released yet.
 
 ![alt text](images/all_rating_systems.png)
 
@@ -21,19 +24,20 @@ For individual players, create groupings of players that are tied. For example:
 #  Assuming you have references to player objects 'a', 'b', 'c', and 'd'
 standings = [[a, 0, 0], [b, 1, 2], [c, 1, 2], [d, 3, 3]]
 ```
-Shows that player `a` is first, players `b` and `c` are tied for second, and player `d` is third.
+shows that player `a` is first, players `b` and `c` are tied for second, and player `d` is third. Each player object must contain the **range** of their respective groups.
+
+> The players must be in order.
 
 ### For Teams
 
-For team games, the format is similar, but instead of grouping based on rank, you group based on teams, where the first integer is `team` and second integer is `rank`. The rank for each team is set by the first player of a particular team:
+For team games, the format is similar, but instead of grouping based on rank, you group based on teams, where the first integer is `team` and second integer is `rank`. The players of each team are aggregated to a `team rating`.  The `rank` is relative to other teams, not players on each team. The rank for each team is set by the first player of a particular team:
 ```py
 #  Assuming you have references to player objects 'a', 'b', 'c', and 'd'
 standings = [[a, 0, 1], [b, 1, 2], [c, 0, 1], [d, 1, 2]]
 ```
-Shows that `a` and `c` are on team `0` with rank `1`, and `b` and `d` are on team `1` with rank `2`.
+shows that `a` and `c` are on team `0` with rank `1`, and `b` and `d` are on team `1` with rank `2`.
 
 > For simplicity, you can set the team integer to the rank integer (assuming the teams and ranks are in order).  Players with different teams and same rank are tied.  The only difference between individual players and team games is the add aggregation method.
-
 
 ## Full example
 
@@ -224,6 +228,8 @@ plt.show()
     - Absolute Value
 - Best game
 - Team skill adjuster (adjusts the skill of each player according to an activation function, i.e., scale higher skilled players higher).
+
+> **Note: the team balancer `team_balancer.py` utilizes combinations of all possible team combinations. This is because it contains auxillary methods to find the intersection of numerous constraints. Therefore, it is not recommended to use the balancer if the team sizes are large.  You must develop a more efficient heuristic.**
 
 ![alt text](images/balancer_diagram.png)
 
