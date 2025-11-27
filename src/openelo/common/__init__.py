@@ -1,7 +1,7 @@
-from .aggregation import *
-from .common import *
-from .player import *
-from .statistics import *
+from . import aggregation
+from . import common
+from . import player
+from . import statistics
 
 __all__ = [*aggregation.__all__,
            *common.__all__,

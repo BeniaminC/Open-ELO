@@ -1,9 +1,9 @@
-from .common import *
-from .systems import *
-from .skill_adjuster import *
-from .team_balancer import *
+from . import common
+from . import systems
+from . import skill_adjuster
+from . import team_systems
 
 __all__ = [*common.__all__,
            *systems.__all__,
            *skill_adjuster.__all__,
-           *team_balancer.__all__]
+           *team_systems.__all__]

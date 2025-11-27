@@ -1,14 +1,13 @@
-from .bradley_terry import *
-from .codeforce import *
-from .elo import *
-from .elommr import *
-from .endureelo import *
-from .glicko import *
-from .plackett_luce import *
-from .thurstone_mosteller import *
-from .topcoder import *
-from .topcoder import *
-from .trueskill import *
+from . import bradley_terry
+from . import codeforce
+from . import elo
+from . import elommr
+from . import endureelo
+from . import glicko
+from . import plackett_luce
+from . import thurstone_mosteller
+from . import topcoder
+from . import trueskill
 
 __all__ = [*bradley_terry.__all__,
            *codeforce.__all__,
